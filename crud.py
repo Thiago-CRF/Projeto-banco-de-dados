@@ -2,7 +2,6 @@ import psycopg2
 import database
 from schemas import Produto
 
-
 class Gerente:
     def __init__(self):
         # abre a conexão logo que a classe for criada
@@ -82,3 +81,35 @@ class Gerente:
         self.cur.close()
         self.con.close()
     
+class Vendedor:
+    def __init__(self):
+        # abre a conexão logo que a classe for criada
+        self.con = psycopg2.connect(database.URL_DATABASE)
+        self.cur = self.con.cursor()
+
+    # criar venda
+    # recebe o id dos produtos que vão ser vendidos e as quantidades (selecionados antes), calcula o valor total da venda
+    # e registra na tabela vendas, registrando também a hora
+    # depois com o id dos produtos, quantidades, id da venda(tabela vendas) e o preço unitario
+    # vai ser preenchido a tabela itens_venda, pra cada produto
+    def registrar_venda(self, lista_prod: tuple):
+        # lista de tuplas dos produtos [(id, qnt_venda), (id, qnt_venda)]
+
+        soma_valores = 0
+        for i in lista_prod:
+            self.cur.execute("""
+                SELECT preco
+                FROM produtos
+                WHERE id_prod = %s
+                """, (i[0]),)
+            soma_valores += (i[1] * self.cur.fetchone()[0])
+
+
+        self.cur.execute("""
+            INSERT INTO venda (valor_total)
+            VALUES (%s)
+            RETURNING id_venda""", (soma_valores)
+        )
+        id_venda = self.cur.fetchone()
+
+        self.con.commit()
