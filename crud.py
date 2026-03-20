@@ -1,12 +1,7 @@
 import psycopg2
 import database
+from schemas import Produto
 
-class Produto:
-    def __init__(self, nome, descricao, preco):
-        self.nome = nome
-        self.desc = descricao
-        self.preco = preco
-        self.qnt_vendida = 0
 
 class Gerente:
     def __init__(self):
@@ -24,6 +19,8 @@ class Gerente:
         )
         self.con.commit()
         print(f"\n# Produto '{produto.nome}' cadastrado #")
+
+        return produto.nome
 
     # 'atualizar produto' pra alterar o preço, nome ou descrição do produto
     # ao atualizar o produto chamando essa função, preciso que caso a pessoa não digite um novo
@@ -51,22 +48,6 @@ class Gerente:
             SELECT * FROM produtos ORDER BY preco ASC"""
             )
         produtos = self.cur.fetchall()
-        if not produtos:
-            #para e retorna a lista vazia de produtos antes caso não tenha produtos
-            return produtos
-
-        print("\n| ID | Nome | Preço(R$) | Quantidade vendida | Descrição")
-        print("-"*80)
-        for i in produtos:
-            print(f"- ID {i[0]} | {i[1]} | R$ {i[3]} | {i[4]} |")
-
-            if i[2] == None:
-                print("")
-            else:
-                print(f"{i[2]}\n")
-
-        print("-"*80)
-
         # retornando pra quando chamar essa função antes de modificar um produto
         # a função que chama tem a os dados atuais do produto a ser modificado
         # pra reenviar esses dados caso não modifica algum parametro do produto
@@ -93,22 +74,8 @@ class Gerente:
             ORDER BY valor_vendido DESC
             """)
         
-        resultados = self.cur.fetchall()
-
-        if not resultados:
-            print("Nenhuma venda registrada.")
-            return
-
-        print(f"\n--# Relatório de vendas #--")
-        print("\nNome | Preço(R$) | Quantidade vendida")
-
-        valor_total_vendas = 0
-        for i in resultados:
-            print(f"{i[0]} | {i[1]} | {i[2]}")
-            valor_total_vendas += float(i[3])
-            # como o select foi selecionado e não *, o nome é indice [0], preco: [1], 
-            # qnt_vendida: [2], valor vendido: [3]
-        print(f"Valor total de venda: R$ {valor_total_vendas}")
+        relatorio = self.cur.fetchall()
+        return relatorio
 
     # fecha cursor e conexão com o banco
     def fechar_conexao(self):
