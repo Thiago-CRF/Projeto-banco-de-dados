@@ -1,0 +1,117 @@
+import psycopg2
+import database
+
+class Produto:
+    def __init__(self, nome, descricao, preco):
+        self.nome = nome
+        self.desc = descricao
+        self.preco = preco
+        self.qnt_vendida = 0
+
+class Gerente:
+    def __init__(self):
+        # abre a conexão logo que a classe for criada
+        self.con = psycopg2.connect(database.URL_DATABASE)
+        self.cur = self.con.cursor()
+
+    # criar métodos de gerenciamento da lanchonete:
+    # 'inserir produto' pra criar um novo produto no banco
+    def inserir_prod(self, produto: Produto):
+        self.cur.execute("""
+            INSERT INTO produtos(nome, descricao, preco, qnt_vendida)
+            VALUES (%s, %s, %s, %s)""", (produto.nome, produto.desc, 
+                                         produto.preco, produto.qnt_vendida)
+        )
+        self.con.commit()
+        print(f"\n# Produto '{produto.nome}' cadastrado #")
+
+    # 'atualizar produto' pra alterar o preço, nome ou descrição do produto
+    # ao atualizar o produto chamando essa função, preciso que caso a pessoa não digite um novo
+    # nome, ou descrição ou preço, seja enviado o nome, preço ou descrição antigas,
+    # fazer isso na função que recebe a entrada do usuário (não pode ficar sem)
+    def atualizar_prod(self, id_produto, produto: Produto):
+        self.cur.execute("""
+            UPDATE produtos SET preco = %s, nome = %s, descricao = %s
+            WHERE id_prod = %s""", (produto.preco, produto.nome, produto.desc, id_produto)
+            )
+        self.con.commit()
+        print(f"\n# Produto de id: {id_produto} atualizado #")
+
+    # 'remover produto' pra remover completamente o produto do banco
+    def remover_prod(self, id_produto):
+        self.cur.execute("""
+            DELETE FROM produtos WHERE id_prod = %s""", (id_produto,)
+            )
+        self.con.commit()
+        print(f"\n# Produto de id: {id_produto} removido #")
+
+    # 'listar todos' pra listas todos os produtos, com id, nome, descrição, preço
+    def listar_todos(self):
+        self.cur.execute("""
+            SELECT * FROM produtos ORDER BY preco ASC"""
+            )
+        produtos = self.cur.fetchall()
+        if not produtos:
+            #para e retorna a lista vazia de produtos antes caso não tenha produtos
+            return produtos
+
+        print("\n| ID | Nome | Preço(R$) | Quantidade vendida | Descrição")
+        print("-"*80)
+        for i in produtos:
+            print(f"- ID {i[0]} | {i[1]} | R$ {i[3]} | {i[4]} |")
+
+            if i[2] == None:
+                print("")
+            else:
+                print(f"{i[2]}\n")
+
+        print("-"*80)
+
+        # retornando pra quando chamar essa função antes de modificar um produto
+        # a função que chama tem a os dados atuais do produto a ser modificado
+        # pra reenviar esses dados caso não modifica algum parametro do produto
+        return produtos
+
+    # 'pesquisar por nome' pra pesquisar e mostrar os produtos com nome correspondente
+    def pesquisar_prod_por_nome(self, nome_pesquisa):
+        self.cur.execute("""
+            SELECT * FROM produtos  
+            WHERE nome ILIKE %s""", (f"{nome_pesquisa}%",) 
+            )       # presisa mandar a variavel nome como fstring pra colocar as %% em volta
+
+        resultados = self.cur.fetchall()
+        return resultados
+
+    # 'gerar relatório' gera o relatório de vendas dos produtos, com quantidade vendida, 
+    # valor vendido e valor total. De cada produto
+    def relatorio_vendas(self):
+    # fazer calculo dos valores com código SQL
+        self.cur.execute("""
+            SELECT nome, preco, qnt_vendida, (preco * qnt_vendida) AS valor_vendido 
+            FROM produtos
+            WHERE qnt_vendida > 0
+            ORDER BY valor_vendido DESC
+            """)
+        
+        resultados = self.cur.fetchall()
+
+        if not resultados:
+            print("Nenhuma venda registrada.")
+            return
+
+        print(f"\n--# Relatório de vendas #--")
+        print("\nNome | Preço(R$) | Quantidade vendida")
+
+        valor_total_vendas = 0
+        for i in resultados:
+            print(f"{i[0]} | {i[1]} | {i[2]}")
+            valor_total_vendas += float(i[3])
+            # como o select foi selecionado e não *, o nome é indice [0], preco: [1], 
+            # qnt_vendida: [2], valor vendido: [3]
+        print(f"Valor total de venda: R$ {valor_total_vendas}")
+
+    # fecha cursor e conexão com o banco
+    def fechar_conexao(self):
+        self.cur.close()
+        self.con.close()
+    
