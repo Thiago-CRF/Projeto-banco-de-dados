@@ -52,9 +52,8 @@ def criar_banco():
 
         cur.execute(sql_prod_table)
         cur.execute(sql_sell_table)
-        con.commit()
-
         cur.execute(sql_itens_venda_table)
+        
         con.commit()
 
     except Exception as erro:

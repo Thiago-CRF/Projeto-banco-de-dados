@@ -95,12 +95,13 @@ class Vendedor:
     def registrar_venda(self, lista_prod: tuple):
         # lista de tuplas dos produtos [(id, qnt_venda), (id, qnt_venda)]
 
+        # primeiro faz a inserção na tabela venda. Calculando antes o valor total, buscando os produtos com id selecionados
         ids_produtos = []
         for i in lista_prod:
             ids_produtos.append(i[0])
 
         self.cur.execute("""
-            SELECT id, preco
+            SELECT id_prod, preco
             FROM produtos
             WHERE id_prod IN %s
             """, (tuple(ids_produtos),))
@@ -119,16 +120,30 @@ class Vendedor:
                 soma_valores += (qnt_vendida * dict_precos[id_prod])
 
         self.cur.execute("""
-            INSERT INTO venda (valor_total)
+            INSERT INTO vendas (valor_total)
             VALUES (%s)
-            RETURNING id_venda""", (soma_valores)
+            RETURNING id_venda""", (soma_valores,)
         )
-        id_venda = self.cur.fetchone()
+        # fetch sempre retorna uma tupla, mesmo fetchone. pegando só o primeiro item pra pegar o numero em si
+        id_venda = self.cur.fetchone()[0]
+
+        # depois pega o id da venda pra adicionar os produtos da venda (com a relação de tabelas)
+        # e faz o insert dos produtos da venda com uma lista dos produtos e usando executemany 
 
         # preciso do id_venda, id_produto, quantidade, preco_unid
-        # id_venda está em id_venda. id_produto e preco_unid esta no dicionario id_e_preco
+        # id_venda está em id_venda. id_produto e preco_unid esta no dicionario dict_precos
         # e preco unid esta em lista_prod, lista de tuplas com id e quantidade
+        lista_insert = []
+        for id_prod, quant in lista_prod:
+            if id_prod in dict_precos:
+                preco = dict_precos[id_prod]
+                tupla_temp = (id_venda, id_prod, quant, preco)
+                lista_insert.append(tupla_temp)
 
-
+        # usa o execute many pra fazer usar a lista de insert que criei qntes
+        self.cur.executemany("""
+            INSERT INTO itens_venda (id_venda, id_produto, quantidade, preco_unid)
+            VALUES (%s, %s, %s, %s)""", lista_insert
+        )
 
         self.con.commit()
