@@ -95,15 +95,28 @@ class Vendedor:
     def registrar_venda(self, lista_prod: tuple):
         # lista de tuplas dos produtos [(id, qnt_venda), (id, qnt_venda)]
 
-        soma_valores = 0
+        ids_produtos = []
         for i in lista_prod:
-            self.cur.execute("""
-                SELECT preco
-                FROM produtos
-                WHERE id_prod = %s
-                """, (i[0]),)
-            soma_valores += (i[1] * self.cur.fetchone()[0])
+            ids_produtos.append(i[0])
 
+        self.cur.execute("""
+            SELECT id, preco
+            FROM produtos
+            WHERE id_prod IN %s
+            """, (tuple(ids_produtos),))
+
+        id_e_preco = self.cur.fetchall()            
+
+        # cria um dicionario de preços pra calcular o valor total depois {id: preço}
+        dict_precos = {}
+        for linha in id_e_preco:
+            dict_precos[linha[0]] = linha[1]
+
+        # calculo do valor total da venda, passa comparando cada id ao dicionario e soma no valor total
+        soma_valores = 0
+        for id_prod, qnt_vendida in lista_prod:
+            if id_prod in dict_precos:
+                soma_valores += (qnt_vendida * dict_precos[id_prod])
 
         self.cur.execute("""
             INSERT INTO venda (valor_total)
@@ -111,5 +124,11 @@ class Vendedor:
             RETURNING id_venda""", (soma_valores)
         )
         id_venda = self.cur.fetchone()
+
+        # preciso do id_venda, id_produto, quantidade, preco_unid
+        # id_venda está em id_venda. id_produto e preco_unid esta no dicionario id_e_preco
+        # e preco unid esta em lista_prod, lista de tuplas com id e quantidade
+
+
 
         self.con.commit()
