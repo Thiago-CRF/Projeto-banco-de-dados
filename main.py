@@ -33,6 +33,8 @@ def home():
     return {"message": "API da lanchonete."}
 
 # métodos de manipulação dos produtos (GERENTE)
+
+# Inserir produto no banco 
 @app.post("/produtos")
 def criar_produto(produto: schemas.ProdutoBase, adm: crud.Gerente = Depends(get_gerente)):
     
@@ -42,6 +44,17 @@ def criar_produto(produto: schemas.ProdutoBase, adm: crud.Gerente = Depends(get_
     adm.inserir_prod(produto)
 
     return {"mensagem": f"Produto de nome '{produto.nome}' inserido no banco de dados"}
+
+# Modifica os atributos de um produto do banco. Exceto a quantidade vendida.
+@app.put("/produtos/{id_prod}")
+def atualizar_produto(produto_att: schemas.ProdutoBase, id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
+    # front-end precisa enviar todos os atributos que vão estar na atualização, mesmo os que não vão ser modificados,
+    # enviando os valores antigos caso o cliente não queira modificar
+    try:
+        return {"Retorno": adm.atualizar_prod(id_prod, produto_att)}
+    # se o id pra atualização não for encontrado, pega o erro de id não encontrado na função atualizar_prod do crud
+    except ValueError as err:
+        raise HTTPException(status_code=404, detail=str(err))
 
 @app.get("/produtos", response_model=list[schemas.Produto])
 def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):

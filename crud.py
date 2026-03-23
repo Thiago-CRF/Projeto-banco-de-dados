@@ -28,10 +28,18 @@ class Gerente:
     def atualizar_prod(self, id_produto, produto: Produto):
         self.cur.execute("""
             UPDATE produtos SET preco = %s, nome = %s, descricao = %s
-            WHERE id_prod = %s""", (produto.preco, produto.nome, produto.desc, id_produto)
+            WHERE id_prod = %s
+            RETURNING id_prod
+            """, (produto.preco, produto.nome, produto.desc, id_produto)
             )
+        res = self.cur.fetchone()[0]
+
+        if res is None:
+            raise ValueError(f"Produto de id: {id_produto} não encontrado para atualização")
+        
         self.con.commit()
-        print(f"\n# Produto de id: {id_produto} atualizado #")
+
+        return f"Produto de id: {res} atualizado"
 
     # 'remover produto' pra remover completamente o produto do banco
     def remover_prod(self, id_produto):
@@ -147,9 +155,21 @@ class Vendedor:
             VALUES (%s, %s, %s, %s)""", lista_insert
         )
 
+        # atualiza a quantidade vendida no sistema, criando uma lista de tuplas qnt_vendida, id pra dar UPDATE na tabela produtos
+        lista_update = []
+        for i in lista_prod:
+            tupla_temp = (i.qnt_venda, i.id)
+            lista_update.append(tupla_temp)
+
+        self.cur.executemany("""
+            UPDATE produtos
+            SET qnt_vendida = (qnt_vendida + %s)
+            WHERE id_prod = %s""", lista_update
+        )
+
         self.con.commit()
 
-        return (f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada.")
+        return f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada."
 
 
     def fechar_conexao(self):
