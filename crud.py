@@ -2,8 +2,6 @@ import psycopg2
 import database
 from schemas import Produto, ProdutoVenda
 
-# TODO Reorganizar pra que o a classe Vendedor possa listar todos e pesquisar por nome também. E Gerente herde tudo
-
 class Vendedor:
     def __init__(self):
         # abre a conexão logo que a classe for criada
@@ -14,7 +12,28 @@ class Vendedor:
     def fechar_conexao(self):
         self.cur.close()
         self.con.close()
-        
+
+    # 'listar todos' pra listas todos os produtos, com id, nome, descrição, preço
+    def listar_todos(self):
+        self.cur.execute("""
+            SELECT * FROM produtos ORDER BY preco ASC"""
+            )
+        produtos = self.cur.fetchall()
+        # retornando pra quando chamar essa função antes de modificar um produto
+        # a função que chama tem a os dados atuais do produto a ser modificado
+        # pra reenviar esses dados caso não modifica algum parametro do produto
+        return produtos
+
+    # 'pesquisar por nome' pra pesquisar e mostrar os produtos com nome correspondente
+    def pesquisar_prod_por_nome(self, nome_pesquisa):
+        self.cur.execute("""
+            SELECT * FROM produtos  
+            WHERE nome ILIKE %s""", (f"{nome_pesquisa}%",) 
+            )       # presisa mandar a variavel nome como fstring pra colocar as %% em volta
+
+        resultados = self.cur.fetchall()
+        return resultados
+
     # criar venda
     # recebe o id dos produtos que vão ser vendidos e as quantidades (selecionados antes), calcula o valor total da venda
     # e registra na tabela vendas, registrando também a hora
@@ -116,14 +135,14 @@ class Gerente(Vendedor):
             RETURNING id_prod
             """, (produto.preco, produto.nome, produto.desc, id_produto)
             )
-        res = self.cur.fetchone()[0]
+        res = self.cur.fetchone()
 
         if res is None:
             raise ValueError(f"Produto de id: {id_produto} não encontrado para atualização")
         
         self.con.commit()
 
-        return f"Produto de id: {res} atualizado"
+        return f"Produto de id: {res[0]} atualizado"
 
     # 'remover produto' pra remover completamente o produto do banco
     def remover_prod(self, id_produto):
@@ -137,27 +156,6 @@ class Gerente(Vendedor):
         self.con.commit()
 
         return f"Produto de id: {id_produto} removido"
-
-    # 'listar todos' pra listas todos os produtos, com id, nome, descrição, preço
-    def listar_todos(self):
-        self.cur.execute("""
-            SELECT * FROM produtos ORDER BY preco ASC"""
-            )
-        produtos = self.cur.fetchall()
-        # retornando pra quando chamar essa função antes de modificar um produto
-        # a função que chama tem a os dados atuais do produto a ser modificado
-        # pra reenviar esses dados caso não modifica algum parametro do produto
-        return produtos
-
-    # 'pesquisar por nome' pra pesquisar e mostrar os produtos com nome correspondente
-    def pesquisar_prod_por_nome(self, nome_pesquisa):
-        self.cur.execute("""
-            SELECT * FROM produtos  
-            WHERE nome ILIKE %s""", (f"{nome_pesquisa}%",) 
-            )       # presisa mandar a variavel nome como fstring pra colocar as %% em volta
-
-        resultados = self.cur.fetchall()
-        return resultados
 
     # 'gerar relatório' gera o relatório de vendas dos produtos, com quantidade vendida, 
     # valor vendido e valor total. De cada produto

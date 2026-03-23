@@ -26,7 +26,6 @@ def get_vendedor():
     finally:
         vend.fechar_conexao()
 
-
 @app.get("/")
 def home():
     """Rota publica de teste pra API"""
@@ -36,7 +35,7 @@ def home():
 # métodos de manipulação dos produtos (GERENTE)
 
 # Inserir produto no banco 
-@app.post("/produtos")
+@app.post("/produtos")  # TODO refazer esse método e a integração dele no crud pra verificar e dar exceptions em erros
 def criar_produto(produto: schemas.ProdutoBase, adm: crud.Gerente = Depends(get_gerente)):
     # ATUALIZAR PRA PEGAR ERROS DE INSERÇÃO
     
@@ -67,6 +66,22 @@ def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err))
 
+
+# métodos de manipulação das vendas / pesquisa (VENDEDOR E GERENTE)
+
+# registra uma venda no banco de dados
+@app.post("/venda")
+def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor = Depends(get_vendedor)):
+    # envia uma lista de Objetos pydantic ProdutoVenda
+    try:
+        # registra a venda e retorna formato JSON pra facilitar no retorno da API
+        return {"Retorno": vend.registrar_venda(produtos_venda)}
+
+    except ValueError as err:
+        # se acontecer de ter o ValueError do id enviado estar errado, vai pegar o erro e subir uma exceção HTTP mostrando a mensagem  
+        raise HTTPException(status_code=404, detail=str(err))
+    
+# lista todos os produtos do banco
 @app.get("/produtos", response_model=list[schemas.Produto])
 def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):
     
@@ -85,10 +100,11 @@ def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):
 
     return prod_formatados
 
-@app.get("/pesuisa", response_model=list[schemas.Produto])
-def pesquisa_por_nome(nome_pesquisa: str, adm: crud.Gerente = Depends(get_gerente)):
+# pesquisa produtos por nome
+@app.get("/produtos/pesuisa", response_model=list[schemas.Produto])
+def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Gerente = Depends(get_vendedor)):
 
-    res_pesquisa = adm.pesquisar_prod_por_nome(nome_pesquisa)
+    res_pesquisa = vend.pesquisar_prod_por_nome(nome_pesquisa)
 
     pesquisa_formatada = []
     for i in res_pesquisa:
@@ -104,16 +120,27 @@ def pesquisa_por_nome(nome_pesquisa: str, adm: crud.Gerente = Depends(get_gerent
     return pesquisa_formatada
 
 
-# métodos de manipulação das vendas (VENDEDOR)
+# TODO:
 
-# registra uma venda no banco de dados
-@app.post("/venda")
-def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor = Depends(get_vendedor)):
-    # envia uma lista de Objetos pydantic ProdutoVenda
-    try:
-        # registra a venda e retorna formato JSON pra facilitar no retorno da API
-        return {"Retorno": vend.registrar_venda(produtos_venda)}
+# buscar dados de um só produto pelo id. detalhes_produto(id_prod). Fazer função no crud e o (GET /produtos/{id_prod}) no main pra API
 
-    except ValueError as err:
-        # se acontecer de ter o ValueError do id enviado estar errado, vai pegar o erro e subir uma exceção HTTP mostrando a mensagem  
-        raise HTTPException(status_code=404, detail=str(err))
+# fazer o método do relatório de vendas dos produtos na API (GET /produtos/relatorio). Usando a função crud.relatorio_vendas()
+
+# fazer um método que mostra o histórico de vendas, mostrando id, valor total, data/hora e itens(de forma simples). Fazer função no crud e o (GET /vendas) no main pra API
+# filtrar o histórico de vendas por data, de: data_init, até: data_fim
+
+# fazer um método que pega o relatório completo de uma só venda, como um recibo da venda, incluindo os dados completos da tabela itens_venda. 
+# fazendo método (GET /vendas/{id_venda}) e função no crud detalhes_venda
+
+# fazer as classes pydantic de venda. ItemVenda, VendaBase/Venda. (talvez RelatorioVenda)
+
+# TODO 2. Depois fazer a parte de autenticação:
+
+# fazer o login do usuário, sendo só vendedor ou gerente,
+# fazendo tabela de usuários, com id, username, hash_senha, e acesso(sendo Gerente ou Vendedor. Ou 1 e 0 para acesso completo ou não)
+
+# fazer a rota de login que o usuário envia username e senha e recebe o token. E tudo que for fazer precisa ser validado pelo token.
+
+# fazer a separação de o que o vendedor não pode acessar que o gerente pode na prática (talvez seja mais no front-end)
+# mas também verificar não só o token mas também o acesso da conta quando for as funções de gerente
+
