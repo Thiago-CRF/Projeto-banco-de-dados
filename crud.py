@@ -149,7 +149,7 @@ class Vendedor:
 
         self.con.commit()
 
-        return (f"Venda de id{id_venda} com valor total: R${soma_valores:.2f} registrada.")
+        return (f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada.")
 
 
     def fechar_conexao(self):
