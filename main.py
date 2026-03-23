@@ -32,18 +32,20 @@ def home():
     """Rota publica de teste pra API"""
     return {"message": "API da lanchonete."}
 
+
 # métodos de manipulação dos produtos (GERENTE)
 
 # Inserir produto no banco 
 @app.post("/produtos")
 def criar_produto(produto: schemas.ProdutoBase, adm: crud.Gerente = Depends(get_gerente)):
+    # ATUALIZAR PRA PEGAR ERROS DE INSERÇÃO
     
     if produto.desc == "" or produto.desc == "string":
         produto.desc = None
 
     adm.inserir_prod(produto)
 
-    return {"mensagem": f"Produto de nome '{produto.nome}' inserido no banco de dados"}
+    return {"Retorno": f"Produto de nome '{produto.nome}' inserido no banco de dados"}
 
 # Modifica os atributos de um produto do banco. Exceto a quantidade vendida.
 @app.put("/produtos/{id_prod}")
@@ -53,6 +55,15 @@ def atualizar_produto(produto_att: schemas.ProdutoBase, id_prod: int, adm: crud.
     try:
         return {"Retorno": adm.atualizar_prod(id_prod, produto_att)}
     # se o id pra atualização não for encontrado, pega o erro de id não encontrado na função atualizar_prod do crud
+    except ValueError as err:
+        raise HTTPException(status_code=404, detail=str(err))
+    
+@app.delete("/produtos/{id_prod}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
+    # envia o id do produto que quer deletar e retorna um no content pra mostrar que deletou
+    try:
+        return {"Retorno": adm.remover_prod(id_prod)}
+    # se o id não for encontrado, pega o erro na função do banco do crud
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err))
 
@@ -76,6 +87,8 @@ def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):
 
 
 # métodos de manipulação das vendas (VENDEDOR)
+
+# registra uma venda no banco de dados
 @app.post("/venda")
 def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor = Depends(get_vendedor)):
     # envia uma lista de Objetos pydantic ProdutoVenda

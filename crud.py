@@ -46,8 +46,13 @@ class Gerente:
         self.cur.execute("""
             DELETE FROM produtos WHERE id_prod = %s""", (id_produto,)
             )
+        
+        if self.cur.rowcount == 0:
+            raise ValueError(f"Produto de id: {id_produto} não encontrado para remoção")
+
         self.con.commit()
-        print(f"\n# Produto de id: {id_produto} removido #")
+
+        return f"Produto de id: {id_produto} removido"
 
     # 'listar todos' pra listas todos os produtos, com id, nome, descrição, preço
     def listar_todos(self):
