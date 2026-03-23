@@ -4,12 +4,94 @@ from schemas import Produto, ProdutoVenda
 
 # TODO Reorganizar pra que o a classe Vendedor possa listar todos e pesquisar por nome também. E Gerente herde tudo
 
-class Gerente:
+class Vendedor:
     def __init__(self):
         # abre a conexão logo que a classe for criada
         self.con = psycopg2.connect(database.URL_DATABASE)
         self.cur = self.con.cursor()
 
+    # fecha cursor e conexão com o banco
+    def fechar_conexao(self):
+        self.cur.close()
+        self.con.close()
+        
+    # criar venda
+    # recebe o id dos produtos que vão ser vendidos e as quantidades (selecionados antes), calcula o valor total da venda
+    # e registra na tabela vendas, registrando também a hora
+    # depois com o id dos produtos, quantidades, id da venda(tabela vendas) e o preço unitario
+    # vai ser preenchido a tabela itens_venda, pra cada produto
+    def registrar_venda(self, lista_prod: list[ProdutoVenda]):
+        # recebe lista de obejtos pydantic ProdutoVenda. atributos: id, qnt_venda
+
+        # primeiro pega os valores do produtos recebidos, com o id e faz o calculo do valor total da compra
+        ids_produtos = []
+        for item in lista_prod:
+            ids_produtos.append(item.id)
+
+        self.cur.execute("""
+            SELECT id_prod, preco
+            FROM produtos
+            WHERE id_prod IN %s""", (tuple(ids_produtos),) # typecast tuple pra não dar erro caso tenha só 1 id
+        )
+
+        resultado = self.cur.fetchall()
+        dict_id_preco = {}
+        for linha in resultado:
+            dict_id_preco[linha[0]] = linha[1]
+
+        # calculo do valor total da venda, passa comparando cada id ao dicionario e soma no valor total
+        soma_valores = 0
+        for i in lista_prod:
+            # verifica se algum id recebido não existe no banco
+            if i.id not in  dict_id_preco:
+                raise ValueError(f"Produto de id '{i.id}' não encontrado no sistema")
+            
+            # depois faz o calculo da soma dos valores
+            soma_valores += (i.qnt_venda * dict_id_preco[i.id])
+
+        self.cur.execute("""
+            INSERT INTO vendas (valor_total)
+            VALUES (%s)
+            RETURNING id_venda""", (soma_valores,)
+        )
+        # fetch sempre retorna uma tupla, mesmo fetchone. pegando só o primeiro item pra pegar o numero em si
+        id_venda = self.cur.fetchone()[0]
+
+        # depois pega o id da venda pra adicionar os produtos da venda (com a relação de tabelas)
+        # e faz o insert dos produtos da venda com uma lista dos produtos e usando executemany 
+
+        # preciso do id_venda, id_produto, quantidade, preco_unid
+        # id_venda está em id_venda. id_produto e preco_unid esta no dicionario dict_id_preco
+        # e quantidade esta em lista_prod, lista de obejetos pydantic com id e quantidade
+        lista_insert = []
+        for i in lista_prod:
+            preco_unid = dict_id_preco[i.id]
+            tupla_temp = (id_venda, i.id, i.qnt_venda, preco_unid)
+            lista_insert.append(tupla_temp)
+
+        # usa o execute many pra fazer usar a lista de insert que criei qntes
+        self.cur.executemany("""
+            INSERT INTO itens_venda (id_venda, id_produto, quantidade, preco_unid)
+            VALUES (%s, %s, %s, %s)""", lista_insert
+        )
+
+        # atualiza a quantidade vendida no sistema, criando uma lista de tuplas qnt_vendida, id pra dar UPDATE na tabela produtos
+        lista_update = []
+        for i in lista_prod:
+            tupla_temp = (i.qnt_venda, i.id)
+            lista_update.append(tupla_temp)
+
+        self.cur.executemany("""
+            UPDATE produtos
+            SET qnt_vendida = (qnt_vendida + %s)
+            WHERE id_prod = %s""", lista_update
+        )
+
+        self.con.commit()
+
+        return f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada."
+
+class Gerente(Vendedor):
     # criar métodos de gerenciamento da lanchonete:
     # 'inserir produto' pra criar um novo produto no banco
     def inserir_prod(self, produto: Produto):
@@ -90,95 +172,4 @@ class Gerente:
         
         relatorio = self.cur.fetchall()
         return relatorio
-
-    # fecha cursor e conexão com o banco
-    def fechar_conexao(self):
-        self.cur.close()
-        self.con.close()
     
-class Vendedor:
-    def __init__(self):
-        # abre a conexão logo que a classe for criada
-        self.con = psycopg2.connect(database.URL_DATABASE)
-        self.cur = self.con.cursor()
-
-    # criar venda
-    # recebe o id dos produtos que vão ser vendidos e as quantidades (selecionados antes), calcula o valor total da venda
-    # e registra na tabela vendas, registrando também a hora
-    # depois com o id dos produtos, quantidades, id da venda(tabela vendas) e o preço unitario
-    # vai ser preenchido a tabela itens_venda, pra cada produto
-    def registrar_venda(self, lista_prod: list[ProdutoVenda]):
-        # recebe lista de obejtos pydantic ProdutoVenda. atributos: id, qnt_venda
-
-        # primeiro pega os valores do produtos recebidos, com o id e faz o calculo do valor total da compra
-        ids_produtos = []
-        for item in lista_prod:
-            ids_produtos.append(item.id)
-
-        self.cur.execute("""
-            SELECT id_prod, preco
-            FROM produtos
-            WHERE id_prod IN %s""", (tuple(ids_produtos),) # typecast tuple pra não dar erro caso tenha só 1 id
-        )
-
-        resultado = self.cur.fetchall()
-        dict_id_preco = {}
-        for linha in resultado:
-            dict_id_preco[linha[0]] = linha[1]
-
-        # calculo do valor total da venda, passa comparando cada id ao dicionario e soma no valor total
-        soma_valores = 0
-        for i in lista_prod:
-            # verifica se algum id recebido não existe no banco
-            if i.id not in  dict_id_preco:
-                raise ValueError(f"Produto de id '{i.id}' não encontrado no sistema")
-            
-            # depois faz o calculo da soma dos valores
-            soma_valores += (i.qnt_venda * dict_id_preco[i.id])
-
-        self.cur.execute("""
-            INSERT INTO vendas (valor_total)
-            VALUES (%s)
-            RETURNING id_venda""", (soma_valores,)
-        )
-        # fetch sempre retorna uma tupla, mesmo fetchone. pegando só o primeiro item pra pegar o numero em si
-        id_venda = self.cur.fetchone()[0]
-
-        # depois pega o id da venda pra adicionar os produtos da venda (com a relação de tabelas)
-        # e faz o insert dos produtos da venda com uma lista dos produtos e usando executemany 
-
-        # preciso do id_venda, id_produto, quantidade, preco_unid
-        # id_venda está em id_venda. id_produto e preco_unid esta no dicionario dict_id_preco
-        # e quantidade esta em lista_prod, lista de obejetos pydantic com id e quantidade
-        lista_insert = []
-        for i in lista_prod:
-            preco_unid = dict_id_preco[i.id]
-            tupla_temp = (id_venda, i.id, i.qnt_venda, preco_unid)
-            lista_insert.append(tupla_temp)
-
-        # usa o execute many pra fazer usar a lista de insert que criei qntes
-        self.cur.executemany("""
-            INSERT INTO itens_venda (id_venda, id_produto, quantidade, preco_unid)
-            VALUES (%s, %s, %s, %s)""", lista_insert
-        )
-
-        # atualiza a quantidade vendida no sistema, criando uma lista de tuplas qnt_vendida, id pra dar UPDATE na tabela produtos
-        lista_update = []
-        for i in lista_prod:
-            tupla_temp = (i.qnt_venda, i.id)
-            lista_update.append(tupla_temp)
-
-        self.cur.executemany("""
-            UPDATE produtos
-            SET qnt_vendida = (qnt_vendida + %s)
-            WHERE id_prod = %s""", lista_update
-        )
-
-        self.con.commit()
-
-        return f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada."
-
-
-    def fechar_conexao(self):
-        self.cur.close()
-        self.con.close()
