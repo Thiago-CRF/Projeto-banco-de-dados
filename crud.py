@@ -23,6 +23,19 @@ class Vendedor:
         # a função que chama tem a os dados atuais do produto a ser modificado
         # pra reenviar esses dados caso não modifica algum parametro do produto
         return produtos
+    
+    # mostra todos os detalhes de um só produto, pesquisando pelo id
+    def mostrar_um_produto(self, id_produto):
+        self.cur.execute("""
+            SELECT * FROM produtos
+            WHERE id_prod = %s""", (id_produto,)
+        )
+        detalhes_prod = self.cur.fetchone()
+
+        if detalhes_prod is None:
+            raise ValueError(f"Produto de id: '{id_produto}' não encontrado para exibição")
+
+        return detalhes_prod
 
     # 'pesquisar por nome' pra pesquisar e mostrar os produtos com nome correspondente
     def pesquisar_prod_por_nome(self, nome_pesquisa):
@@ -138,7 +151,7 @@ class Gerente(Vendedor):
         res = self.cur.fetchone()
 
         if res is None:
-            raise ValueError(f"Produto de id: {id_produto} não encontrado para atualização")
+            raise ValueError(f"Produto de id: '{id_produto}' não encontrado para atualização")
         
         self.con.commit()
 
@@ -151,7 +164,7 @@ class Gerente(Vendedor):
             )
         
         if self.cur.rowcount == 0:
-            raise ValueError(f"Produto de id: {id_produto} não encontrado para remoção")
+            raise ValueError(f"Produto de id: '{id_produto}' não encontrado para remoção")
 
         self.con.commit()
 
@@ -162,7 +175,7 @@ class Gerente(Vendedor):
     def relatorio_vendas(self):
     # fazer calculo dos valores com código SQL
         self.cur.execute("""
-            SELECT nome, preco, qnt_vendida, (preco * qnt_vendida) AS valor_vendido 
+            SELECT id_prod, nome, preco, qnt_vendida, (preco * qnt_vendida) AS valor_vendido 
             FROM produtos
             WHERE qnt_vendida > 0
             ORDER BY valor_vendido DESC

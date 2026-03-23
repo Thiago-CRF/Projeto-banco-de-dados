@@ -15,3 +15,10 @@ class Produto(ProdutoBase, ProdID):
 
 class ProdutoVenda(ProdID):
     qnt_venda: int
+
+# venda
+class RelatorioProduto(ProdID):
+    nome: str
+    preco: float
+    qnt_vendida: int
+    valor_vendido: float

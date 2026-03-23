@@ -57,6 +57,7 @@ def atualizar_produto(produto_att: schemas.ProdutoBase, id_prod: int, adm: crud.
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err))
     
+# exclui um produto do banco de dados
 @app.delete("/produtos/{id_prod}")
 def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
     # envia o id do produto que quer deletar e retorna um no content pra mostrar que deletou
@@ -65,6 +66,28 @@ def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
     # se o id não for encontrado, pega o erro na função do banco do crud
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err))
+    
+# relatório de venda dos produtos (primeiro simples, depois filtra por data)
+@app.get("/produtos/relatorio", response_model=list[schemas.RelatorioProduto])
+def relatorio_vendas_produtos(adm: crud.Gerente = Depends(get_gerente)):
+
+    relatorio = adm.relatorio_vendas()
+
+    if relatorio == None:
+        raise HTTPException(status_code=204, detail=("Nenhuma produto com venda registrada"))
+    else:
+        relatorio_formatado = []
+        for i in relatorio:
+            relatorio_dict = {
+                "id": i[0],
+                "nome": i[1],
+                "preco": i[2],
+                "qnt_vendida": i[3],
+                "valor_vendido": i[4]
+            }
+            relatorio_formatado.append(relatorio_dict)
+
+        return relatorio_formatado
 
 
 # métodos de manipulação das vendas / pesquisa (VENDEDOR E GERENTE)
@@ -119,10 +142,29 @@ def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Gerente = Depends(get_vende
 
     return pesquisa_formatada
 
+@app.get("/produtos/{id_prod}", response_model=schemas.Produto)
+def detalhes_produto(id_prod: int, vend: crud.Gerente = Depends(get_vendedor)):
+
+    try:
+        dados_produto = vend.mostrar_um_produto(id_prod)
+
+    except ValueError as err:
+        raise HTTPException(status_code=404, detail=str(err))
+
+    prod_formatado = {  # TRANSFORMAR FORMATAÇÃO EM UM FUNÇÃO
+            "id": dados_produto[0],
+            "nome": dados_produto[1],
+            "desc": dados_produto[2],
+            "preco": dados_produto[3],
+            "qnt_vendida": dados_produto[4]
+        }
+    
+    return prod_formatado
+
 
 # TODO:
 
-# buscar dados de um só produto pelo id. detalhes_produto(id_prod). Fazer função no crud e o (GET /produtos/{id_prod}) no main pra API
+# [FEITO] buscar dados de um só produto pelo id. detalhes_produto(id_prod). Fazer função no crud e o (GET /produtos/{id_prod}) no main pra API
 
 # fazer o método do relatório de vendas dos produtos na API (GET /produtos/relatorio). Usando a função crud.relatorio_vendas()
 
