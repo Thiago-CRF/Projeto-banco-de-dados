@@ -19,13 +19,20 @@ def get_gerente():
     finally:
         adm.fechar_conexao()
 
+def get_vendedor():
+    vend = crud.Vendedor()
+    try:
+        yield vend
+    finally:
+        vend.fechar_conexao()
+
 
 @app.get("/")
 def home():
     """Rota publica de teste pra API"""
     return {"message": "API de tarefas rodando."}
 
-
+# métodos de manipulação dos produtos (GERENTE)
 @app.post("/produtos")
 def criar_produto(produto: schemas.ProdutoBase, adm: crud.Gerente = Depends(get_gerente)):
     
@@ -53,3 +60,13 @@ def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):
         prod_formatados.append(prod_dict)
 
     return prod_formatados
+
+
+# métodos de manipulação das vendas (VENDEDOR)
+@app.post("/venda")
+def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor = Depends(get_vendedor)):
+    # envia uma lista de Objetos pydantic ProdutoVenda
+    
+    mensagem = vend.registrar_venda(produtos_venda)
+
+    return mensagem

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
+from typing import Optional
 
 class ProdutoBase(BaseModel):
     nome: str
@@ -12,3 +12,6 @@ class ProdID(BaseModel):
 
 class Produto(ProdutoBase, ProdID):
     model_config = ConfigDict(from_attributes=True)
+
+class ProdutoVenda(ProdID):
+    qnt_venda: int
