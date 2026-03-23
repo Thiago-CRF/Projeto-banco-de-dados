@@ -2,6 +2,8 @@ import psycopg2
 import database
 from schemas import Produto, ProdutoVenda
 
+# TODO Reorganizar pra que o a classe Vendedor possa listar todos e pesquisar por nome também. E Gerente herde tudo
+
 class Gerente:
     def __init__(self):
         # abre a conexão logo que a classe for criada

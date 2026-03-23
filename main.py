@@ -58,7 +58,7 @@ def atualizar_produto(produto_att: schemas.ProdutoBase, id_prod: int, adm: crud.
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err))
     
-@app.delete("/produtos/{id_prod}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/produtos/{id_prod}")
 def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
     # envia o id do produto que quer deletar e retorna um no content pra mostrar que deletou
     try:
@@ -84,6 +84,24 @@ def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):
         prod_formatados.append(prod_dict)
 
     return prod_formatados
+
+@app.get("/pesuisa", response_model=list[schemas.Produto])
+def pesquisa_por_nome(nome_pesquisa: str, adm: crud.Gerente = Depends(get_gerente)):
+
+    res_pesquisa = adm.pesquisar_prod_por_nome(nome_pesquisa)
+
+    pesquisa_formatada = []
+    for i in res_pesquisa:
+        prod_dict = {
+            "id": i[0],
+            "nome": i[1],
+            "desc": i[2],
+            "preco": i[3],
+            "qnt_vendida": i[4]
+        }
+        pesquisa_formatada.append(prod_dict)
+
+    return pesquisa_formatada
 
 
 # métodos de manipulação das vendas (VENDEDOR)
