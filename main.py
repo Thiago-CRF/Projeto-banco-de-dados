@@ -163,26 +163,35 @@ def detalhes_produto(id_prod: int, vend: crud.Vendedor = Depends(get_vendedor)):
 
 # histórico de vendas, começando na mais recente. Talvez deixar só pro ADM
 @app.get("/venda/historico", response_model=list[schemas.HistoricoVenda])
-def historico_de_vendas(adm: crud.Gerente = Depends(get_gerente)):
+def historico_de_vendas(vend: crud.Vendedor = Depends(get_vendedor)):
 
     try:
-        historico_bruto = adm.historico_vendas()
+        historico_bruto = vend.historico_vendas()
 
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err))
     
-    historico_formatado = []
+    # separa por venda(id, data_hora, valor_total), e uma lista de todos os produtos da venda
+    historico_formatado = {}
     for i in historico_bruto:
-        historico_dict = {
-            "id_venda": i[0],
-            "data_hora": i[1],
-            "valor_total": i[2],
+        id_venda = i[0]
+
+        if id_venda not in historico_formatado:
+            historico_formatado[id_venda] = {
+                "id_venda": i[0],
+                "data_hora": i[1],
+                "valor_total": i[2],
+                "itens": []
+            }
+        
+        historico_formatado[id_venda]["itens"].append({
             "nome_prod": i[3],
             "preco_prod": i[4]
-        }
-        historico_formatado.append(historico_dict)
+        })
 
-    return historico_formatado
+    return list(historico_formatado.values())
+
+
 
 # TODO:
 
@@ -190,7 +199,7 @@ def historico_de_vendas(adm: crud.Gerente = Depends(get_gerente)):
 
 # [FEITO] fazer o método do relatório de vendas dos produtos na API (GET /produtos/relatorio). Usando a função crud.relatorio_vendas()
 
-# fazer um método que mostra o histórico de vendas, mostrando id, valor total, data/hora e itens(de forma simples). Fazer função no crud e o (GET /vendas) no main pra API
+# [FEITO] fazer um método que mostra o histórico de vendas, mostrando id, valor total, data/hora e itens(de forma simples). Fazer função no crud e o (GET /vendas) no main pra API
 # filtrar o histórico de vendas por data, de: data_init, até: data_fim
 
 # fazer um método que pega o relatório completo de uma só venda, como um recibo da venda, incluindo os dados completos da tabela itens_venda. 

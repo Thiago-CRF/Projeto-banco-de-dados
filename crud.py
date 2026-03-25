@@ -122,6 +122,25 @@ class Vendedor:
         self.con.commit()
 
         return f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada."
+    
+    # histórico de vendas
+    def historico_vendas(self):
+        # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço)
+        self.cur.execute("""
+            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
+            FROM vendas V
+            INNER JOIN itens_venda I ON V.id_venda = I.id_venda
+            INNER JOIN produtos P ON P.id_prod = I.id_produto
+            WHERE I.id_venda = V.id_venda and P.id_prod = I.id_produto
+            ORDER BY V.data_hora DESC, V.id_venda DESC"""
+            )
+        historico = self.cur.fetchall()
+        # inner join pra facilitar na consulta
+        
+        if not historico:
+            raise ValueError(f"Nenhuma venda encontrada para exibição")
+        
+        return historico
 
 class Gerente(Vendedor):
     # criar métodos de gerenciamento da lanchonete:
@@ -184,18 +203,3 @@ class Gerente(Vendedor):
         relatorio = self.cur.fetchall()
         return relatorio
     
-    # histórico de vendas
-    def historico_vendas(self):
-        # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço)
-        self.cur.execute("""
-            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
-            FROM vendas V, itens_venda I, produtos P
-            WHERE I.id_venda = V.id_venda and P.id_prod = I.id_produto
-            ORDER BY V.data_hora DESC"""
-            )
-        historico = self.cur.fetchall()
-        
-        if historico is None:
-            raise ValueError(f"Nenhuma venda encontrado para exibição")
-        
-        return historico

@@ -24,10 +24,12 @@ class RelatorioProduto(ProdID):
     qnt_vendida: int
     valor_vendido: float
 
-# SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
-class HistoricoVenda(BaseModel): 
+
+class VendaBase(BaseModel):
     id_venda: int
     data_hora: datetime
     valor_total: float
-    nome_prod: str
-    preco_prod: float
+
+# SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
+class HistoricoVenda(VendaBase): 
+    itens: list
