@@ -125,7 +125,7 @@ def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):
 
 # pesquisa produtos por nome
 @app.get("/produtos/pesuisa", response_model=list[schemas.Produto])
-def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Gerente = Depends(get_vendedor)):
+def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Vendedor = Depends(get_vendedor)):
 
     res_pesquisa = vend.pesquisar_prod_por_nome(nome_pesquisa)
 
@@ -143,7 +143,7 @@ def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Gerente = Depends(get_vende
     return pesquisa_formatada
 
 @app.get("/produtos/{id_prod}", response_model=schemas.Produto)
-def detalhes_produto(id_prod: int, vend: crud.Gerente = Depends(get_vendedor)):
+def detalhes_produto(id_prod: int, vend: crud.Vendedor = Depends(get_vendedor)):
 
     try:
         dados_produto = vend.mostrar_um_produto(id_prod)
@@ -161,12 +161,34 @@ def detalhes_produto(id_prod: int, vend: crud.Gerente = Depends(get_vendedor)):
     
     return prod_formatado
 
+# histórico de vendas, começando na mais recente. Talvez deixar só pro ADM
+@app.get("/venda/historico", response_model=list[schemas.HistoricoVenda])
+def historico_de_vendas(adm: crud.Gerente = Depends(get_gerente)):
+
+    try:
+        historico_bruto = adm.historico_vendas()
+
+    except ValueError as err:
+        raise HTTPException(status_code=404, detail=str(err))
+    
+    historico_formatado = []
+    for i in historico_bruto:
+        historico_dict = {
+            "id_venda": i[0],
+            "data_hora": i[1],
+            "valor_total": i[2],
+            "nome_prod": i[3],
+            "preco_prod": i[4]
+        }
+        historico_formatado.append(historico_dict)
+
+    return historico_formatado
 
 # TODO:
 
 # [FEITO] buscar dados de um só produto pelo id. detalhes_produto(id_prod). Fazer função no crud e o (GET /produtos/{id_prod}) no main pra API
 
-# fazer o método do relatório de vendas dos produtos na API (GET /produtos/relatorio). Usando a função crud.relatorio_vendas()
+# [FEITO] fazer o método do relatório de vendas dos produtos na API (GET /produtos/relatorio). Usando a função crud.relatorio_vendas()
 
 # fazer um método que mostra o histórico de vendas, mostrando id, valor total, data/hora e itens(de forma simples). Fazer função no crud e o (GET /vendas) no main pra API
 # filtrar o histórico de vendas por data, de: data_init, até: data_fim

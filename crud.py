@@ -184,3 +184,18 @@ class Gerente(Vendedor):
         relatorio = self.cur.fetchall()
         return relatorio
     
+    # histórico de vendas
+    def historico_vendas(self):
+        # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço)
+        self.cur.execute("""
+            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
+            FROM vendas V, itens_venda I, produtos P
+            WHERE I.id_venda = V.id_venda and P.id_prod = I.id_produto
+            ORDER BY V.data_hora DESC"""
+            )
+        historico = self.cur.fetchall()
+        
+        if historico is None:
+            raise ValueError(f"Nenhuma venda encontrado para exibição")
+        
+        return historico
