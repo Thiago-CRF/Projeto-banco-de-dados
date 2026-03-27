@@ -1,6 +1,6 @@
 import psycopg2
 import database
-from schemas import Produto, ProdutoVenda
+from schemas import Produto, ProdutoVenda, CreateUser
 
 class Vendedor:
     def __init__(self):
@@ -160,7 +160,7 @@ class Gerente(Vendedor):
     # ao atualizar o produto chamando essa função, preciso que caso a pessoa não digite um novo
     # nome, ou descrição ou preço, seja enviado o nome, preço ou descrição antigas,
     # fazer isso na função que recebe a entrada do usuário (não pode ficar sem)
-    def atualizar_prod(self, id_produto, produto: Produto):
+    def atualizar_prod(self, id_produto: int, produto: Produto):
         self.cur.execute("""
             UPDATE produtos SET preco = %s, nome = %s, descricao = %s
             WHERE id_prod = %s
@@ -202,4 +202,37 @@ class Gerente(Vendedor):
         
         relatorio = self.cur.fetchall()
         return relatorio
+    
+    # retorna None (lista vazia) se o usuário não existir e o id de usuário se ele já existir
+    def verificar_username(self, username: str):
+        # para a busca no primeiro que encontra
+        self.cur.execute("""
+            SELECT id_usuario
+            FROM usuarios
+            WHERE username = %s
+            LIMIT 1""", (username,)
+        )
+        res = self.cur.fetchone()
+
+        return res
+
+    # guarda novo usuario no banco
+    def criar_usuario(self, usuario: CreateUser):
+
+        self.cur.execute("""
+            INSERT INTO usuarios(username, hash_senha, cargo)
+            VALUES (%s, %s, %s)
+            RETURNING id_usuario, username, cargo""", (usuario.username, usuario.senha, usuario.cargo)
+        )
+        retorno = self.cur.fetchone()
+        self.con.commit()
+
+        # formatando pro formato pydantic de schemas.User
+        retorno_formatado = {
+            "id_usuario": retorno[0],
+            "username": retorno[1],
+            "cargo": retorno[2]
+        }
+
+        return retorno_formatado
     

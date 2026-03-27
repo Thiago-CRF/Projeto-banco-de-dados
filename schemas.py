@@ -33,3 +33,18 @@ class VendaBase(BaseModel):
 # SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
 class HistoricoVenda(VendaBase): 
     itens: list
+
+# schemas de usuarios
+class UserBase(BaseModel):
+    username: str
+    cargo: str
+
+class CreateUser(UserBase):
+# criar usuário, envia a senha digitada
+    senha: str
+    
+class User(UserBase):
+# modelo de resposta, o que a API devolve quando pede os dados de um usuário especifico
+    id_usuario: int
+
+    model_config = ConfigDict(from_attributes=True)

@@ -2,6 +2,7 @@
 import database
 import crud
 import schemas
+import auth
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -31,6 +32,24 @@ def home():
     """Rota publica de teste pra API"""
     return {"message": "API da lanchonete."}
 
+
+# métodos criar usuário (apenas gerente) e login
+@app.post("/users", response_model=schemas.User)
+def criar_usuario(usuario: schemas.CreateUser, adm: crud.Gerente = Depends(get_gerente)):
+
+    if adm.verificar_username(usuario.username.lower()) != None:
+        raise HTTPException(status_code=400, detail="E-mail já cadastrado")
+    
+    # hash da senha usando auth.py
+    senha_hash = auth.get_hash_senha(usuario.senha)
+
+    novo_usuario = schemas.CreateUser(username=usuario.username.lower(), 
+                                      senha=senha_hash, 
+                                      cargo=usuario.cargo.lower())
+
+    usuario_criado = adm.criar_usuario(novo_usuario)
+
+    return usuario_criado
 
 # métodos de manipulação dos produtos (GERENTE)
 
