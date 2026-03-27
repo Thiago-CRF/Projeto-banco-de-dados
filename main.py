@@ -8,18 +8,56 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 
+import jwt
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+
 # cria o banco e inicia obj adm de gerente e a API
 database.criar_banco()
 
 app = FastAPI(title="API Lanchonete")
 
-def get_gerente():
+# esquema de autenticação que diz ao fastAPI que o token pro login é na rota /login
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def decode_token(token: str = Depends(oauth2_scheme)):
+    # try pega o payload do token, decodifica e pega o username e cargo do payload do token
+    # e para se o token for incompleto, expirado ou se for invalido
+    try:
+        payload = jwt.decode(token, auth.AUTH_KEY, algorithms=[auth.ALGORITHM])
+
+        username: str = payload.get("sub")
+        cargo: str = payload.get("cargo")
+
+        if username is None or cargo is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Token incompleto ou invalido")
+
+        return payload
+    
+    # pega o erro se o token expirou
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Seu login expirou. Entre novamente")
+
+    # pega o erro se o token for invalido
+    except InvalidTokenError as err:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail=f"Token invalido: {str(err)}")
+
+
+def get_gerente(payload: dict = Depends(decode_token)):
+    # pega o token que esta logado e ve se o cargo bate com gerente pra liberar acesso as funçoes de gerente
+    if payload.get("cargo") != "gerente":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
+                            detail="Acesso negado. Ação exige acesso de gerente")
+
     adm = crud.Gerente()
     try:
         yield adm
     finally:
         adm.fechar_conexao()
 
+# vendedor continua igual porque só tem gerente e vendedor. Então não precisa verificar se é vendedor quando chamar
 def get_vendedor():
     vend = crud.Vendedor()
     try:
@@ -27,8 +65,14 @@ def get_vendedor():
     finally:
         vend.fechar_conexao()
 
-# esquema de autenticação que diz ao fastAPI que o token pro login é na rota /login
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+# conexão livre pra login
+def get_con_livre():
+    db = crud.Gerente()
+    try:
+        yield db
+    finally:
+        db.fechar_conexao()
+
 
 @app.get("/")
 def home():
@@ -55,10 +99,11 @@ def criar_usuario(usuario: schemas.CreateUser, adm: crud.Gerente = Depends(get_g
     return usuario_criado
 
 # login de usuario
-def login(form_data: OAuth2PasswordRequestForm = Depends(), adm: crud.Gerente = Depends(get_gerente)):
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: crud.Gerente = Depends(get_con_livre)):
     # busca o usuario no banco, pelo nome e pega o erro que tem no crud se o username não existri
     try:
-        usuario_db = adm.buscar_usuario(form_data.username.lower())
+        usuario_db = db.buscar_usuario(form_data.username.lower())
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err))
 
@@ -77,7 +122,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), adm: crud.Gerente = 
     token_acesso = auth.criar_token_JWT(dados=dados_token)
 
     # precisa retornar no formato do protocolo OAuth2
-    return {"acess_token": token_acesso, "token_type": "bearer"}
+    return {"access_token": token_acesso, "token_type": "bearer"}
 
 
 # métodos de manipulação dos produtos (GERENTE)
@@ -154,9 +199,9 @@ def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor 
     
 # lista todos os produtos do banco
 @app.get("/produtos", response_model=list[schemas.Produto])
-def listar_produtos(adm: crud.Gerente = Depends(get_gerente)):
+def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
     
-    produtos = adm.listar_todos()
+    produtos = vend.listar_todos()
 
     prod_formatados = []
     for i in produtos:

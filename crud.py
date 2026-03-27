@@ -247,7 +247,7 @@ class Gerente(Vendedor):
         res = self.cur.fetchone()
 
         if res is None:
-            raise ValueError(f"Usuário de email: '{username}' não encontrado")
+            return None
         
         usuario_dict = {
             "id_usuario": res[0],
