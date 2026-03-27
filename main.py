@@ -205,9 +205,9 @@ def historico_de_vendas(vend: crud.Vendedor = Depends(get_vendedor)):
 # fazer um método que pega o relatório completo de uma só venda, como um recibo da venda, incluindo os dados completos da tabela itens_venda. 
 # fazendo método (GET /vendas/{id_venda}) e função no crud detalhes_venda
 
-# fazer as classes pydantic de venda. ItemVenda, VendaBase/Venda. (talvez RelatorioVenda)
+# [MEIO FEITO] fazer as classes pydantic de venda. ItemVenda, VendaBase/Venda. (talvez RelatorioVenda)
 
-# TODO 2. Depois fazer a parte de autenticação:
+# TODO 2. Depois fazer a parte de autenticação [FAZER ANTES DO FRONT-END E DE MELHORIAS PRÁTICAS]:
 
 # fazer o login do usuário, sendo só vendedor ou gerente,
 # fazendo tabela de usuários, com id, username, hash_senha, e acesso(sendo Gerente ou Vendedor. Ou 1 e 0 para acesso completo ou não)
