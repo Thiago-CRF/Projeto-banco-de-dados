@@ -49,10 +49,19 @@ def criar_banco():
         # on delete cascade é pra que quando alguma venda for deletada, os itens da venda também são deletados
         # deletadno tudo em cascata
 
+        sql_usuarios_table = """
+        CREATE TABLE IF NOT EXISTS usuarios (
+        id_usuario SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        hash_senha VARCHAR(255) NOT NULL,
+        cargo VARCHAR(15) NOT NULL
+        );
+        """
 
         cur.execute(sql_prod_table)
         cur.execute(sql_sell_table)
         cur.execute(sql_itens_venda_table)
+        cur.execute(sql_usuarios_table)
         
         con.commit()
 
