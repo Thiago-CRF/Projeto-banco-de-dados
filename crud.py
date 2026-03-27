@@ -236,3 +236,24 @@ class Gerente(Vendedor):
 
         return retorno_formatado
     
+    # busca os dados do usuario pra login
+    def buscar_usuario(self, username: str):
+        
+        self.cur.execute("""
+            SELECT *
+            FROM usuarios
+            WHERE username = %s""", (username,)         
+        )
+        res = self.cur.fetchone()
+
+        if res is None:
+            raise ValueError(f"Usuário de email: '{username}' não encontrado")
+        
+        usuario_dict = {
+            "id_usuario": res[0],
+            "username": res[1],
+            "hash_senha": res[2],
+            "cargo": res[3]
+        }
+
+        return usuario_dict

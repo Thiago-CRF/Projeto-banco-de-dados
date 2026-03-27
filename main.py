@@ -27,6 +27,9 @@ def get_vendedor():
     finally:
         vend.fechar_conexao()
 
+# esquema de autenticação que diz ao fastAPI que o token pro login é na rota /login
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 @app.get("/")
 def home():
     """Rota publica de teste pra API"""
@@ -38,18 +41,44 @@ def home():
 def criar_usuario(usuario: schemas.CreateUser, adm: crud.Gerente = Depends(get_gerente)):
 
     if adm.verificar_username(usuario.username.lower()) != None:
-        raise HTTPException(status_code=400, detail="E-mail já cadastrado")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="E-mail já cadastrado")
     
     # hash da senha usando auth.py
-    senha_hash = auth.get_hash_senha(usuario.senha)
+    hash_senha = auth.get_hash_senha(usuario.senha)
 
     novo_usuario = schemas.CreateUser(username=usuario.username.lower(), 
-                                      senha=senha_hash, 
+                                      senha=hash_senha, 
                                       cargo=usuario.cargo.lower())
 
     usuario_criado = adm.criar_usuario(novo_usuario)
 
     return usuario_criado
+
+# login de usuario
+def login(form_data: OAuth2PasswordRequestForm = Depends(), adm: crud.Gerente = Depends(get_gerente)):
+    # busca o usuario no banco, pelo nome e pega o erro que tem no crud se o username não existri
+    try:
+        usuario_db = adm.buscar_usuario(form_data.username.lower())
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err))
+
+    # verifica a senha, retornando true ou false, verify do passlib cryptcontext
+    verificacao_senha = auth.verificar_senha(form_data.password, usuario_db["hash_senha"])
+
+    if not verificacao_senha:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Senha de usuário incorreta")
+    
+    # cria o payload do token JWT e depois envia pro auth.criar_token_JWT pra fazer o encode do token
+    dados_token = {
+        "sub": usuario_db["username"],
+        "cargo": usuario_db["cargo"]
+    }
+
+    token_acesso = auth.criar_token_JWT(dados=dados_token)
+
+    # precisa retornar no formato do protocolo OAuth2
+    return {"acess_token": token_acesso, "token_type": "bearer"}
+
 
 # métodos de manipulação dos produtos (GERENTE)
 
@@ -74,7 +103,7 @@ def atualizar_produto(produto_att: schemas.ProdutoBase, id_prod: int, adm: crud.
         return {"Retorno": adm.atualizar_prod(id_prod, produto_att)}
     # se o id pra atualização não for encontrado, pega o erro de id não encontrado na função atualizar_prod do crud
     except ValueError as err:
-        raise HTTPException(status_code=404, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
 # exclui um produto do banco de dados
 @app.delete("/produtos/{id_prod}")
@@ -84,7 +113,7 @@ def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
         return {"Retorno": adm.remover_prod(id_prod)}
     # se o id não for encontrado, pega o erro na função do banco do crud
     except ValueError as err:
-        raise HTTPException(status_code=404, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
 # relatório de venda dos produtos (primeiro simples, depois filtra por data)
 @app.get("/produtos/relatorio", response_model=list[schemas.RelatorioProduto])
@@ -93,7 +122,7 @@ def relatorio_vendas_produtos(adm: crud.Gerente = Depends(get_gerente)):
     relatorio = adm.relatorio_vendas()
 
     if relatorio == None:
-        raise HTTPException(status_code=204, detail=("Nenhuma produto com venda registrada"))
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail=("Nenhuma produto com venda registrada"))
     else:
         relatorio_formatado = []
         for i in relatorio:
@@ -121,7 +150,7 @@ def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor 
 
     except ValueError as err:
         # se acontecer de ter o ValueError do id enviado estar errado, vai pegar o erro e subir uma exceção HTTP mostrando a mensagem  
-        raise HTTPException(status_code=404, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
 # lista todos os produtos do banco
 @app.get("/produtos", response_model=list[schemas.Produto])
@@ -168,7 +197,7 @@ def detalhes_produto(id_prod: int, vend: crud.Vendedor = Depends(get_vendedor)):
         dados_produto = vend.mostrar_um_produto(id_prod)
 
     except ValueError as err:
-        raise HTTPException(status_code=404, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
 
     prod_formatado = {  # TRANSFORMAR FORMATAÇÃO EM UM FUNÇÃO
             "id": dados_produto[0],
@@ -188,7 +217,7 @@ def historico_de_vendas(vend: crud.Vendedor = Depends(get_vendedor)):
         historico_bruto = vend.historico_vendas()
 
     except ValueError as err:
-        raise HTTPException(status_code=404, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
     # separa por venda(id, data_hora, valor_total), e uma lista de todos os produtos da venda
     historico_formatado = {}
