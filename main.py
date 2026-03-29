@@ -16,6 +16,14 @@ database.criar_banco()
 
 app = FastAPI(title="API Lanchonete")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # colocar as URLs do front deploy e localhost
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # esquema de autenticação que diz ao fastAPI que o token pro login é na rota /login
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -286,6 +294,17 @@ def historico_de_vendas(vend: crud.Vendedor = Depends(get_vendedor)):
 
 
 
+# TODO 3:
+# Fazer método de excluir usuário e mudar senha de uma conta. ambos apenas caso gerente esteja logado
+
+# talvez associar a venda ao nome do vendedor. 
+
+# fazer um método que pega o relatório completo de uma só venda, como um recibo da venda, incluindo os dados completos da tabela itens_venda. 
+# fazendo método (GET /vendas/{id_venda}) e função no crud detalhes_venda
+
+# [MEIO FEITO] fazer as classes pydantic de venda. ItemVenda, VendaBase/Venda. (talvez RelatorioVenda)
+
+
 # TODO:
 
 # [FEITO] buscar dados de um só produto pelo id. detalhes_produto(id_prod). Fazer função no crud e o (GET /produtos/{id_prod}) no main pra API
@@ -295,18 +314,12 @@ def historico_de_vendas(vend: crud.Vendedor = Depends(get_vendedor)):
 # [FEITO] fazer um método que mostra o histórico de vendas, mostrando id, valor total, data/hora e itens(de forma simples). Fazer função no crud e o (GET /vendas) no main pra API
 # filtrar o histórico de vendas por data, de: data_init, até: data_fim
 
-# fazer um método que pega o relatório completo de uma só venda, como um recibo da venda, incluindo os dados completos da tabela itens_venda. 
-# fazendo método (GET /vendas/{id_venda}) e função no crud detalhes_venda
+# [FEITO] TODO 2. Depois fazer a parte de autenticação [FAZER ANTES DO FRONT-END E DE MELHORIAS PRÁTICAS]:
 
-# [MEIO FEITO] fazer as classes pydantic de venda. ItemVenda, VendaBase/Venda. (talvez RelatorioVenda)
-
-# TODO 2. Depois fazer a parte de autenticação [FAZER ANTES DO FRONT-END E DE MELHORIAS PRÁTICAS]:
-
-# fazer o login do usuário, sendo só vendedor ou gerente,
+# [FEITO] fazer o login do usuário, sendo só vendedor ou gerente,
 # fazendo tabela de usuários, com id, username, hash_senha, e acesso(sendo Gerente ou Vendedor. Ou 1 e 0 para acesso completo ou não)
 
-# fazer a rota de login que o usuário envia username e senha e recebe o token. E tudo que for fazer precisa ser validado pelo token.
+# [FEITO] fazer a rota de login que o usuário envia username e senha e recebe o token. E tudo que for fazer precisa ser validado pelo token.
 
-# fazer a separação de o que o vendedor não pode acessar que o gerente pode na prática (talvez seja mais no front-end)
+# [FEITO] fazer a separação de o que o vendedor não pode acessar que o gerente pode na prática (talvez seja mais no front-end)
 # mas também verificar não só o token mas também o acesso da conta quando for as funções de gerente
-
