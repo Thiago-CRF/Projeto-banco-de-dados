@@ -321,7 +321,7 @@ function GerenciarProdutos({ token, onVoltar }) {
                           onClick={() => handleDeletarProduto(produto.id, produto.nome)} 
                           style={{ padding: '8px 15px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
                         >
-                          Deletar
+                          Excluir
                         </button>
                       </div>
                     </div>
