@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Caixa from './Caixa'; // Importamos a tela nova que acabamos de criar!
 import './index.css';
 
+const URL_BASE = 'http://localhost:8000';
+
 function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +21,7 @@ function App() {
       formData.append('username', username);
       formData.append('password', password);
 
-      const response = await fetch('http://localhost:8000/login', {
+      const response = await fetch(`${URL_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData,

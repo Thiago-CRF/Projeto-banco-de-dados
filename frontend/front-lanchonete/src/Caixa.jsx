@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+const URL_BASE = 'http://localhost:8000';
+
 function Caixa({ token, onLogout }) {
   const [produtos, setProdutos] = useState([]);
   
@@ -9,7 +11,7 @@ function Caixa({ token, onLogout }) {
   useEffect(() => {
     const buscarProdutos = async () => {
       try {
-        const response = await fetch('http://localhost:8000/produtos', {
+        const response = await fetch(`${URL_BASE}/produtos`, {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -43,6 +45,28 @@ function Caixa({ token, onLogout }) {
     });
   };
 
+  // FUNÇÃO DOS BOTÕES: Remover item ou diminuir quantidade
+  const removerDoCarrinho = (produtoId) => {
+    setCarrinho((carrinhoAtual) => {
+      // Encontra o item que queremos alterar
+      const itemExistente = carrinhoAtual.find(item => item.id === produtoId);
+
+      // Se só tem 1, tira do carrinho filtrando tudo que for diferente do ID dele
+      if (itemExistente.quantidade === 1) {
+        return carrinhoAtual.filter(item => item.id !== produtoId);
+      } 
+      
+      // Se tem mais de 1, diminui a quantidade
+      else {
+        return carrinhoAtual.map(item =>
+          item.id === produtoId
+            ? { ...item, quantidade: item.quantidade - 1 }
+            : item
+        );
+      }
+    });
+  };
+
   // CÁLCULO DO TOTAL: Soma (Preço * Quantidade) de todos os itens do carrinho (usando o reduce)
   const valorTotal = carrinho.reduce((acumulador, item) => {
     return acumulador + (item.preco * item.quantidade);
@@ -58,7 +82,7 @@ function Caixa({ token, onLogout }) {
 
     try {
       // 2. Faz o disparo (POST) para a rota de vendas
-      const response = await fetch('http://localhost:8000/venda', {
+      const response = await fetch(`${URL_BASE}/venda`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Agora sim enviamos como JSON!
@@ -128,8 +152,33 @@ function Caixa({ token, onLogout }) {
             <div>
               {/* Lista os itens do carrinho */}
               {carrinho.map((item, index) => (
-                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ccc', padding: '10px 0' }}>
-                  <span>{item.quantidade}x {item.nome}</span>
+                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #ccc', padding: '10px 0' }}>
+                  
+                  {/* Agrupando os botões e o nome do produto */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    
+                    {/* Botão de Menos */}
+                    <button 
+                      onClick={() => removerDoCarrinho(item.id)} 
+                      style={{ cursor: 'pointer', padding: '2px 8px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+                    >
+                      -
+                    </button>
+                    
+                    <span>{item.quantidade}x</span>
+                    
+                    {/* Botão de Mais (reaproveitando a função antiga!) */}
+                    <button 
+                      onClick={() => adicionarAoCarrinho(item)} 
+                      style={{ cursor: 'pointer', padding: '2px 8px', backgroundColor: '#007BFF', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+                    >
+                      +
+                    </button>
+                    
+                    <span style={{ marginLeft: '5px' }}>{item.nome}</span>
+                  </div>
+
+                  {/* Preço total do item */}
                   <span>R$ {(item.preco * item.quantidade).toFixed(2)}</span>
                 </div>
               ))}
