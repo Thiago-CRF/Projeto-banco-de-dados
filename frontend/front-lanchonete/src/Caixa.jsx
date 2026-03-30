@@ -44,6 +44,28 @@ function Caixa({ token, onLogout }) {
     }
   };
 
+  // NOVA FUNÇÃO: Escuta cada vez que o usuário digita ou apaga algo
+  const handleMudancaBusca = async (e) => {
+    const valorDigitado = e.target.value;
+    setTermoBusca(valorDigitado); // Atualiza o que aparece na tela
+
+    // Se o usuário apagou tudo (campo ficou vazio), recarrega o cardápio completo!
+    if (valorDigitado.trim() === '') {
+      try {
+        const response = await fetch(`${URL_BASE}/produtos`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProdutos(data); // Devolve todos os produtos para a tela
+        }
+      } catch (error) {
+        console.error("Erro ao recarregar o cardápio:", error);
+      }
+    }
+  };
+
   useEffect(() => {
     const buscarProdutos = async () => {
       try {
@@ -167,8 +189,7 @@ function Caixa({ token, onLogout }) {
                 type="text" 
                 placeholder="Buscar produto..." 
                 value={termoBusca}
-                onChange={(e) => setTermoBusca(e.target.value)}
-                // Opcional: Se apertar 'Enter', também faz a busca
+                onChange={handleMudancaBusca} /* muda automatico */
                 onKeyDown={(e) => e.key === 'Enter' && realizarBusca()}
                 style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '200px' }}
               />
