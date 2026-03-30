@@ -79,8 +79,8 @@ function CriarUsuario({ token, onVoltar }) {
             padding: '6px 12px',
             cursor: 'pointer',
             backgroundColor: 'transparent',
-            color: '#6f42c1',
-            border: '1px solid #6f42c1',
+            color: '#007BFF',
+            border: '1px solid #007BFF',
             borderRadius: '5px',
             fontSize: '14px',
             fontWeight: 'bold'
@@ -152,7 +152,7 @@ function CriarUsuario({ token, onVoltar }) {
             type="submit"
             style={{
               padding: '14px',
-              backgroundColor: '#6f42c1',
+              backgroundColor: '#007BFF',
               color: 'white',
               border: 'none',
               borderRadius: '5px',
@@ -162,8 +162,8 @@ function CriarUsuario({ token, onVoltar }) {
               marginTop: '10px',
               transition: 'background-color 0.2s'
             }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#5a329c'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6f42c1'}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0063ce'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007BFF'}
           >
             Criar Conta
           </button>

@@ -176,13 +176,13 @@ function Caixa({ token, onLogout }) {
             style={{
               padding: '5px 15px',
               cursor: 'pointer',
-              backgroundColor: '#6f42c1',
+              backgroundColor: '#007BFF',
               color: 'white',
               border: 'none',
               borderRadius: '5px'
             }}
           >
-            Configurações
+            Painel administrativo
           </button>
 
           <button
