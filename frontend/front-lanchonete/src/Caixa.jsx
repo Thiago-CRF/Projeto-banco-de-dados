@@ -8,6 +8,42 @@ function Caixa({ token, onLogout }) {
   // NOVO ESTADO: A memória do nosso carrinho de compras
   const [carrinho, setCarrinho] = useState([]);
 
+  // Guarda o que o usuário digita na barra de pesquisa
+  const [termoBusca, setTermoBusca] = useState('');
+
+  // NOVA FUNÇÃO: Dispara a pesquisa no backend
+  const realizarBusca = async () => {
+    try {
+      // 1. Se a barra estiver vazia, buscamos todos os produtos novamente
+      if (termoBusca.trim() === '') {
+        const response = await fetch(`${URL_BASE}/produtos`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProdutos(data);
+        }
+        return; 
+      }
+
+      // 2. CORREÇÃO AQUI: Usando a rota certa e o parâmetro '?nome_pesquisa='
+      const response = await fetch(`${URL_BASE}/produtos/pesquisa?nome_pesquisa=${termoBusca}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProdutos(data); // Atualiza a tela APENAS com os resultados!
+      } else {
+        // Caso não encontre nenhum produto (erro 404, por exemplo)
+        setProdutos([]); 
+      }
+    } catch (error) {
+      console.error("Erro na busca:", error);
+    }
+  };
+
   useEffect(() => {
     const buscarProdutos = async () => {
       try {
@@ -120,7 +156,30 @@ function Caixa({ token, onLogout }) {
         
         {/* COLUNA ESQUERDA: CARDÁPIO (Ocupa 2/3 da tela) */}
         <div style={{ flex: 2 }}>
-          <h3>Cardápio</h3>
+          
+          {/* Cabeçalho do Cardápio com a Busca */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <h3 style={{ margin: 0 }}>Cardápio</h3>
+            
+            {/* O grupo de Input e Botão */}
+            <div style={{ display: 'flex', gap: '5px' }}>
+              <input 
+                type="text" 
+                placeholder="Buscar produto..." 
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
+                // Opcional: Se apertar 'Enter', também faz a busca
+                onKeyDown={(e) => e.key === 'Enter' && realizarBusca()}
+                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '200px' }}
+              />
+              <button 
+                onClick={realizarBusca}
+                style={{ padding: '8px 15px', backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Buscar
+              </button>
+            </div>
+          </div>
           {produtos.length === 0 ? <p>Carregando produtos...</p> : (
             <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
               {/* CORREÇÃO 3: Trocamos prod.id_prod por prod.id no 'key' */}

@@ -225,7 +225,7 @@ def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
     return prod_formatados
 
 # pesquisa produtos por nome
-@app.get("/produtos/pesuisa", response_model=list[schemas.Produto])
+@app.get("/produtos/pesquisa", response_model=list[schemas.Produto])
 def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Vendedor = Depends(get_vendedor)):
 
     res_pesquisa = vend.pesquisar_prod_por_nome(nome_pesquisa)
