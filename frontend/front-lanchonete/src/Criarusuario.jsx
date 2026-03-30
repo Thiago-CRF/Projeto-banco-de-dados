@@ -3,7 +3,7 @@ import { useState } from 'react';
 const URL_BASE = 'http://localhost:8000';
 
 function CriarUsuario({ token, onVoltar }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [cargo, setCargo] = useState('');
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState('');
@@ -11,6 +11,15 @@ function CriarUsuario({ token, onVoltar }) {
   const handleCriarUsuario = async (e) => {
     e.preventDefault();
     setMensagem('');
+
+    // Validação personalizada de E-mail usando Regex
+    // Verifica se tem texto, uma "@", mais texto, um ponto ".", e mais texto no fim.
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!emailRegex.test(email)) {
+      setMensagem('❌ Digite um email válido para criar conta.');
+      return; // O "return" faz a função parar aqui mesmo e não envia para a API
+    }
 
     try {
       const response = await fetch(`${URL_BASE}/users`, {
@@ -20,7 +29,7 @@ function CriarUsuario({ token, onVoltar }) {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          username,
+          username: email, 
           cargo,
           senha
         })
@@ -30,7 +39,7 @@ function CriarUsuario({ token, onVoltar }) {
 
       if (response.ok) {
         setMensagem(`✅ Usuário criado com sucesso! ID: ${data.id_usuario}`);
-        setUsername('');
+        setEmail('');
         setCargo('');
         setSenha('');
       } else {
@@ -42,110 +51,141 @@ function CriarUsuario({ token, onVoltar }) {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '2px solid #ccc',
-          paddingBottom: '10px'
-        }}
-      >
-        <h2>Criar Usuário</h2>
-
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      backgroundColor: '#f4f4f9', 
+      padding: '20px',
+      boxSizing: 'border-box'
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '40px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        width: '100%',
+        maxWidth: '400px',
+        position: 'relative' 
+      }}>
+        
         <button
           onClick={onVoltar}
           style={{
-            padding: '8px 15px',
+            position: 'absolute',
+            top: '15px',
+            left: '15px',
+            padding: '6px 12px',
             cursor: 'pointer',
-            backgroundColor: '#007BFF',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px'
-          }}
-        >
-          Voltar
-        </button>
-      </header>
-
-      <form
-        onSubmit={handleCriarUsuario}
-        style={{
-          maxWidth: '400px',
-          marginTop: '30px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '15px'
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-          style={{
-            padding: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '5px'
-          }}
-        />
-
-        <select
-          value={cargo}
-          onChange={(e) => setCargo(e.target.value)}
-          required
-          style={{
-            padding: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '5px'
-          }}
-        >
-          <option value="">Selecione o cargo</option>
-          <option value="gerente">Gerente</option>
-          <option value="vendedor">Vendedor</option>
-        </select>
-
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          required
-          style={{
-            padding: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '5px'
-          }}
-        />
-
-        <button
-          type="submit"
-          style={{
-            padding: '12px',
-            backgroundColor: '#6f42c1',
-            color: 'white',
-            border: 'none',
+            backgroundColor: 'transparent',
+            color: '#6f42c1',
+            border: '1px solid #6f42c1',
             borderRadius: '5px',
-            cursor: 'pointer',
+            fontSize: '14px',
             fontWeight: 'bold'
           }}
         >
-          Criar Usuário
+          ← Voltar
         </button>
-      </form>
 
-      {mensagem && (
-        <p
+        <h2 style={{ textAlign: 'center', marginTop: '15px', marginBottom: '25px', color: '#333' }}>
+          Criar Usuário
+        </h2>
+
+        {/* Adicionamos noValidate para impedir o balãozinho padrão do navegador */}
+        <form
+          onSubmit={handleCriarUsuario}
+          noValidate 
           style={{
-            marginTop: '20px',
-            fontWeight: 'bold'
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px'
           }}
         >
-          {mensagem}
-        </p>
-      )}
+          <input
+            type="email"
+            placeholder="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{
+              padding: '12px',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              fontSize: '16px'
+            }}
+          />
+
+          <select
+            value={cargo}
+            onChange={(e) => setCargo(e.target.value)}
+            required
+            style={{
+              padding: '12px',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              fontSize: '16px',
+              backgroundColor: 'white'
+            }}
+          >
+            <option value="">Selecione o cargo</option>
+            <option value="gerente">Gerente</option>
+            <option value="vendedor">Vendedor</option>
+          </select>
+
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+            style={{
+              padding: '12px',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              fontSize: '16px'
+            }}
+          />
+
+          <button
+            type="submit"
+            style={{
+              padding: '14px',
+              backgroundColor: '#6f42c1',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '16px',
+              marginTop: '10px',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#5a329c'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6f42c1'}
+          >
+            Criar Conta
+          </button>
+        </form>
+
+        {mensagem && (
+          <p
+            style={{
+              marginTop: '20px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              color: mensagem.includes('✅') ? '#155724' : '#721c24',
+              padding: '10px',
+              backgroundColor: mensagem.includes('✅') ? '#d4edda' : '#f8d7da',
+              borderRadius: '5px',
+              border: `1px solid ${mensagem.includes('✅') ? '#c3e6cb' : '#f5c6cb'}`
+            }}
+          >
+            {mensagem}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

@@ -190,7 +190,7 @@ function Caixa({ token, onLogout }) {
             style={{
               padding: '5px 15px',
               cursor: 'pointer',
-              backgroundColor: '#ff4d4d',
+              backgroundColor: '#dc3545',
               color: 'white',
               border: 'none',
               borderRadius: '5px'
