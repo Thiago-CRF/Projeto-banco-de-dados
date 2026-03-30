@@ -91,35 +91,26 @@ function HistoricoVendas({ token, onVoltar }) {
                   backgroundColor: '#f9f9f9'
                 }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '10px',
-                    marginBottom: '15px'
-                  }}
-                >
-                  <div>
-                    <h3 style={{ margin: 0 }}>Venda #{venda.id_venda}</h3>
-                    <p style={{ margin: '8px 0 0 0' }}>
-                      <strong>Data:</strong>{' '}
-                      {new Date(venda.data_hora).toLocaleString('pt-BR')}
-                    </p>
-                  </div>
+                {/* Removemos o display flex daqui para empilhar os itens */}
+                <div style={{ marginBottom: '15px' }}>
+                  <h3 style={{ margin: 0 }}>Venda #{venda.id_venda}</h3>
+                  
+                  <p style={{ margin: '8px 0 5px 0' }}>
+                    <strong>Data:</strong>{' '}
+                    {new Date(venda.data_hora + 'Z').toLocaleString('pt-BR')}
+                  </p>
 
-                  <div>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: 'green'
-                      }}
-                    >
-                      Total: R$ {Number(venda.valor_total).toFixed(2)}
-                    </p>
-                  </div>
+                  {/* Movemos o Total para cá, logo abaixo da data! */}
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      color: 'green'
+                    }}
+                  >
+                    Total: R$ {Number(venda.valor_total).toFixed(2)}
+                  </p>
                 </div>
 
                 <div>
@@ -129,14 +120,12 @@ function HistoricoVendas({ token, onVoltar }) {
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {venda.itens.map((item, index) => (
                         <li key={index} style={{ marginBottom: '6px' }}>
-                          {typeof item === 'string'
-                            ? item
-                            : JSON.stringify(item)}
+                          {item.nome_prod} - R$ {Number(item.preco_prod).toFixed(2)}
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p style={{ fontStyle: 'italic', color: '#666' }}>
+                    <p style={{ fontStyle: 'italic', color: '#668' }}>
                       Nenhum item registrado.
                     </p>
                   )}
