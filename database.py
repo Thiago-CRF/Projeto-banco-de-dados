@@ -22,7 +22,8 @@ def criar_banco():
         nome VARCHAR(100) NOT NULL,
         descricao TEXT, 
         preco DECIMAL(5, 2) NOT NULL,
-        qnt_vendida INTEGER DEFAULT 0
+        qnt_vendida INTEGER DEFAULT 0,
+        ativo BOOLEAN DEFAULT TRUE
         );
         """
 

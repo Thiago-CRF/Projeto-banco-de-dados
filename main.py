@@ -270,6 +270,26 @@ def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
     return prod_formatados
 
 
+# lista todos os produtos do banco
+@app.get("/produtos/inativos", response_model=list[schemas.Produto])
+def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
+    
+    produtos = vend.listar_inativos()
+
+    prod_formatados = []
+    for i in produtos:
+        prod_dict = {
+            "id": i[0],
+            "nome": i[1],
+            "desc": i[2],
+            "preco": i[3],
+            "qnt_vendida": i[4]
+        }
+        prod_formatados.append(prod_dict)
+
+    return prod_formatados
+
+
 # pesquisa produtos por nome
 @app.get("/produtos/pesquisa", response_model=list[schemas.Produto])
 def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Vendedor = Depends(get_vendedor)):

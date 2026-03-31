@@ -18,7 +18,24 @@ class Vendedor:
     # 'listar todos' pra listas todos os produtos, com id, nome, descrição, preço
     def listar_todos(self):
         self.cur.execute("""
-            SELECT * FROM produtos ORDER BY preco ASC"""
+            SELECT id_prod, nome, descricao, preco, qnt_vendida
+            FROM produtos 
+            WHERE ativo = TRUE
+            ORDER BY preco ASC"""
+            )
+        produtos = self.cur.fetchall()
+        # retornando pra quando chamar essa função antes de modificar um produto
+        # a função que chama tem a os dados atuais do produto a ser modificado
+        # pra reenviar esses dados caso não modifica algum parametro do produto
+        return produtos
+    
+    # lista apenas os produtos inativos (excluidos), pra gerencia.
+    def listar_inativos(self):
+        self.cur.execute("""
+            SELECT id_prod, nome, descricao, preco, qnt_vendida
+            FROM produtos 
+            WHERE ativo = FALSE
+            ORDER BY preco ASC"""
             )
         produtos = self.cur.fetchall()
         # retornando pra quando chamar essa função antes de modificar um produto
@@ -163,7 +180,9 @@ class Gerente(Vendedor):
     # 'remover produto' pra remover completamente o produto do banco
     def remover_prod(self, id_produto):
         self.cur.execute("""
-            DELETE FROM produtos WHERE id_prod = %s""", (id_produto,)
+            UPDATE produtos
+            SET ativo = FALSE
+            WHERE id_prod = %s""", (id_produto,)
             )
         
         if self.cur.rowcount == 0:
