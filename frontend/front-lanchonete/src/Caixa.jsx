@@ -240,16 +240,28 @@ function Caixa({ token, onLogout }) {
               <div
                 key={produto.id}
                 style={{
-                  width: '240px', // Cartões maiores
-                  minHeight: '220px', // Altura mínima maior
+                  width: '240px',
+                  minHeight: '220px',
                   border: '1px solid #e0e0e0',
                   borderRadius: '10px',
                   padding: '15px',
                   backgroundColor: 'white',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
                   display: 'flex',
-                  flexDirection: 'column', // Organiza em coluna
-                  justifyContent: 'space-between' // Espaça os elementos
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  // 1. A propriedade 'transition' garante que o movimento seja suave
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                // 2. onMouseOver: O que acontece quando o mouse ENTRA
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)'; // Sobe 5px
+                  e.currentTarget.style.boxShadow = '0 8px 15px rgba(0, 0, 0, 0.1)'; // Aumenta a sombra
+                }}
+                // 3. onMouseOut: O que acontece quando o mouse SAI
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'; // Volta pro lugar
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)'; // Sombra original
                 }}
               >
                 {/* A mágica acontece aqui no flex: 1. Ele empurra o botão lá pra baixo! */}

@@ -187,7 +187,13 @@ function GerenciarProdutos({ token, onVoltar }) {
       </header>
 
       {mensagem && (
-        <p style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f8d7da', color: '#721c24', borderRadius: '5px', fontWeight: 'bold' }}>
+        <p style={{ 
+          marginTop: '20px', 
+          padding: '10px', 
+          backgroundColor: '#f8d7da', 
+          color: '#721c24', 
+          borderRadius: '5px', 
+          fontWeight: 'bold' }}>
           {mensagem}
         </p>
       )}
@@ -197,7 +203,14 @@ function GerenciarProdutos({ token, onVoltar }) {
           <h3>Catálogo Atual</h3>
           <button
             onClick={buscarProdutos}
-            style={{ padding: '8px 15px', cursor: 'pointer', backgroundColor: '#e0e0e0', color: '#333', border: '1px solid #ccc', borderRadius: '5px' }}
+            style={{ 
+              padding: '8px 15px', 
+              cursor: 'pointer', 
+              backgroundColor: '#e0e0e0', 
+              color: '#333', 
+              border: '1px solid #ccc', 
+              borderRadius: '4px', 
+              fontWeight: 'bold' }}
           >
             Atualizar Lista
           </button>
@@ -210,22 +223,38 @@ function GerenciarProdutos({ token, onVoltar }) {
             
             {/* ⬇️ NOVO: CARD DE ADICIONAR PRODUTO ⬇️ */}
             {adicionando ? (
-              <div style={{ border: '2px dashed #28a745', borderRadius: '10px', padding: '15px 20px', backgroundColor: '#f9fff9' }}>
+              <div style={{ 
+                border: '2px dashed #28a745', 
+                borderRadius: '10px', 
+                padding: '15px 20px', 
+                backgroundColor: '#f9fff9' }}>
+                
                 <h4 style={{ margin: '0 0 10px 0', color: '#28a745' }}>Novo Produto</h4>
+                
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
                   <input
                     type="text"
                     value={novoProduto.nome}
                     onChange={(e) => setNovoProduto({ ...novoProduto, nome: e.target.value })}
                     placeholder="Nome"
-                    style={{ flex: 1, minWidth: '150px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    style={{ 
+                      flex: 1, 
+                      minWidth: '150px', 
+                      padding: '8px', 
+                      borderRadius: '4px', 
+                      border: '1px solid #ccc' }}
                   />
                   <input
                     type="text"
                     value={novoProduto.desc}
                     onChange={(e) => setNovoProduto({ ...novoProduto, desc: e.target.value })}
                     placeholder="Descrição (opcional)"
-                    style={{ flex: 2, minWidth: '200px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    style={{ 
+                      flex: 2, 
+                      minWidth: '200px', 
+                      padding: '8px', 
+                      borderRadius: '4px', 
+                      border: '1px solid #ccc' }}
                   />
                   <input
                     type="number"
@@ -233,16 +262,37 @@ function GerenciarProdutos({ token, onVoltar }) {
                     value={novoProduto.preco}
                     onChange={(e) => setNovoProduto({ ...novoProduto, preco: e.target.value })}
                     placeholder="Preço"
-                    style={{ width: '100px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    style={{ 
+                      width: '100px', 
+                      padding: '8px', 
+                      borderRadius: '4px', 
+                      border: '1px solid #ccc' }}
                   />
                   
                   <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={salvarNovoProduto} style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    <button onClick={salvarNovoProduto} 
+                    style={{ 
+                      padding: '8px 15px', 
+                      backgroundColor: '#28a745', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px', 
+                      cursor: 'pointer', 
+                      fontWeight: 'bold' }}>
                       Adicionar
                     </button>
-                    <button onClick={() => setAdicionando(false)} style={{ padding: '8px 15px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+
+                    <button onClick={() => setAdicionando(false)} 
+                    style={{ 
+                      padding: '8px 15px', 
+                      backgroundColor: '#6c757d', 
+                      color: 'white', border: 'none', 
+                      borderRadius: '4px', 
+                      cursor: 'pointer', 
+                      fontWeight: 'bold' }}>
                       Cancelar
                     </button>
+
                   </div>
                 </div>
               </div>
@@ -250,8 +300,13 @@ function GerenciarProdutos({ token, onVoltar }) {
               <div
                 onClick={() => setAdicionando(true)}
                 style={{
-                  border: '2px dashed #aaa', borderRadius: '10px', padding: '10px 20px',
-                  backgroundColor: '#fafafa', cursor: 'pointer', textAlign: 'center', transition: '0.2s'
+                  border: '2px dashed #aaa', 
+                  borderRadius: '10px', 
+                  padding: '10px 20px',
+                  backgroundColor: '#fafafa', 
+                  cursor: 'pointer', 
+                  textAlign: 'center', 
+                  transition: '0.2s'
                 }}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fafafa'}
@@ -270,26 +325,44 @@ function GerenciarProdutos({ token, onVoltar }) {
                 <div
                   key={produto.id}
                   style={{
-                    border: '1px solid #ccc', borderRadius: '10px', padding: '15px 20px',
-                    backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    border: '1px solid #ccc', 
+                    borderRadius: '10px', 
+                    padding: '15px 20px',
+                    backgroundColor: '#fff', 
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                   }}
                 >
                   {/* EDIÇÃO INLINE */}
                   {editandoId === produto.id ? (
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      gap: '10px', 
+                      flexWrap: 'wrap', 
+                      alignItems: 'center',
+                      minHeight: '82px' }}>
                       <input
                         type="text"
                         value={dadosEdicao.nome}
                         onChange={(e) => setDadosEdicao({ ...dadosEdicao, nome: e.target.value })}
                         placeholder="Nome"
-                        style={{ flex: 1, minWidth: '150px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                        style={{ 
+                          flex: 1, 
+                          minWidth: '150px', 
+                          padding: '8px', 
+                          borderRadius: '4px', 
+                          border: '1px solid #ccc' }}
                       />
                       <input
                         type="text"
                         value={dadosEdicao.desc}
                         onChange={(e) => setDadosEdicao({ ...dadosEdicao, desc: e.target.value })}
                         placeholder="Descrição"
-                        style={{ flex: 2, minWidth: '200px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                        style={{ 
+                          flex: 2, 
+                          minWidth: '200px', 
+                          padding: '8px', 
+                          borderRadius: '4px', 
+                          border: '1px solid #ccc' }}
                       />
                       <input
                         type="number"
@@ -297,27 +370,60 @@ function GerenciarProdutos({ token, onVoltar }) {
                         value={dadosEdicao.preco}
                         onChange={(e) => setDadosEdicao({ ...dadosEdicao, preco: e.target.value })}
                         placeholder="Preço"
-                        style={{ width: '100px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                        style={{ 
+                          width: '100px', 
+                          padding: '8px', 
+                          borderRadius: '4px', 
+                          border: '1px solid #ccc' }}
                       />
                       
                       <div style={{ display: 'flex', gap: '10px' }}>
-                        <button onClick={() => salvarEdicao(produto.id)} style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        <button onClick={() => salvarEdicao(produto.id)} 
+                        style={{ 
+                          padding: '8px 15px', 
+                          backgroundColor: '#28a745', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '4px', 
+                          cursor: 'pointer', 
+                          fontWeight: 'bold' }}>
                           Salvar
                         </button>
-                        <button onClick={cancelarEdicao} style={{ padding: '8px 15px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+
+                        <button onClick={cancelarEdicao} 
+                        style={{ 
+                          padding: '8px 15px', 
+                          backgroundColor: '#6c757d', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '4px', 
+                          cursor: 'pointer', 
+                          fontWeight: 'bold' }}>
                           Cancelar
                         </button>
+
                       </div>
                     </div>
                   ) : (
                     /* VISUALIZAÇÃO DA LISTA */
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                       <div style={{ flex: 1 }}>
-                        <h4 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>{produto.nome}</h4>
-                        <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '14px' }}>
+                        <h4 style={{ 
+                          margin: '0 0 5px 0', 
+                          fontSize: '18px' }}>
+                          {produto.nome}</h4>
+                        
+                        <p style={{ 
+                          margin: '0 0 5px 0', 
+                          color: '#666', 
+                          fontSize: '14px' }}>
                           {produto.desc || 'Sem descrição'}
                         </p>
-                        <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: 'green' }}>
+                        <p style={{ 
+                          margin: 0, 
+                          fontSize: '18px', 
+                          fontWeight: 'bold', 
+                          color: 'green' }}>
                           R$ {Number(produto.preco).toFixed(2)}
                         </p>
                       </div>
@@ -325,13 +431,27 @@ function GerenciarProdutos({ token, onVoltar }) {
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <button 
                           onClick={() => iniciarEdicao(produto)} 
-                          style={{ padding: '8px 15px', backgroundColor: '#e0e0e0', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                          style={{ 
+                            padding: '8px 15px', 
+                            backgroundColor: '#007BFF', 
+                            color: '#ffffff', 
+                            border: 'none', 
+                            borderRadius: '4px', 
+                            cursor: 'pointer', 
+                            fontWeight: 'bold' }}
                         >
                           Editar
                         </button>
                         <button 
                           onClick={() => handleDeletarProduto(produto.id, produto.nome)} 
-                          style={{ padding: '8px 15px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                          style={{ 
+                            padding: '8px 15px', 
+                            backgroundColor: '#dc3545', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '4px', 
+                            cursor: 'pointer', 
+                            fontWeight: 'bold' }}
                         >
                           Excluir
                         </button>
