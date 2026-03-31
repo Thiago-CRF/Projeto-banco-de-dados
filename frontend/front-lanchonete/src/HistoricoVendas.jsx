@@ -7,13 +7,35 @@ function HistoricoVendas({ token, onVoltar }) {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
+  // Estados para os filtros de data
+  const [dataInicio, setDataInicio] = useState('');
+  // Padrão para data fim: hoje (formato YYYY-MM-DD para o input)
+  const [dataFim, setDataFim] = useState(new Date().toISOString().split('T')[0]);
+
   useEffect(() => {
     const buscarHistorico = async () => {
       try {
         setCarregando(true);
         setErro('');
 
-        const response = await fetch(`${URL_BASE}/venda/historico`, {
+        // Montagem da URL com Query Params
+        let url = `${URL_BASE}/venda/historico`;
+        const params = new URLSearchParams();
+
+        if (dataInicio) {
+          params.append('data_inicio', `${dataInicio}T00:00:00`);
+        }
+        
+        if (dataFim) {
+          params.append('data_fim', `${dataFim}T23:59:59`);
+        }
+
+        const queryString = params.toString();
+        if (queryString) {
+          url += `?${queryString}`;
+        }
+
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`
@@ -23,8 +45,11 @@ function HistoricoVendas({ token, onVoltar }) {
         const data = await response.json();
 
         if (!response.ok) {
-          setErro(data.detail || 'Erro ao carregar histórico de vendas.');
+          // Se a API retornar 404 (Nenhuma venda encontrada), limpamos a lista e mostramos a mensagem
           setHistorico([]);
+          if (response.status !== 404) {
+            setErro(data.detail || 'Erro ao carregar histórico.');
+          }
           return;
         }
 
@@ -38,7 +63,7 @@ function HistoricoVendas({ token, onVoltar }) {
     };
 
     buscarHistorico();
-  }, [token]);
+  }, [token, dataInicio, dataFim]); // Atualiza sempre que mudar as datas ou o token
 
   return (
     <div style={{ padding: '20px', backgroundColor: '#f4f4f9', minHeight: '100vh', boxSizing: 'border-box' }}>
@@ -49,11 +74,10 @@ function HistoricoVendas({ token, onVoltar }) {
           alignItems: 'center',
           borderBottom: '2px solid #ccc',
           paddingBottom: '15px',
-          marginBottom: '30px'
+          marginBottom: '20px'
         }}
       >
-        <h2 style={{ margin: 0, color: '#333' }}>🧾 Histórico de Vendas</h2>
-
+        <h2 style={{ margin: 0, color: '#333' }}>📋 Histórico de Vendas</h2>
         <button
           onClick={onVoltar}
           style={{
@@ -71,64 +95,119 @@ function HistoricoVendas({ token, onVoltar }) {
         </button>
       </header>
 
-      <div style={{ marginTop: '25px' }}>
-        {carregando && <p>Carregando histórico...</p>}
+      {/* --- SEÇÃO DE FILTROS --- */}
+      <div style={{ 
+        backgroundColor: 'white', 
+        padding: '15px', 
+        borderRadius: '8px', 
+        marginBottom: '20px', 
+        display: 'flex', 
+        gap: '20px', 
+        alignItems: 'center',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#555' }}>De:</label>
+          <input 
+            type="date" 
+            value={dataInicio}
+            onChange={(e) => setDataInicio(e.target.value)}
+            style={{ padding: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
+          />
+        </div>
 
-        {!carregando && erro && (
-          <p style={{ color: 'red', fontWeight: 'bold' }}>{erro}</p>
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#555' }}>Até:</label>
+          <input 
+            type="date" 
+            value={dataFim}
+            onChange={(e) => setDataFim(e.target.value)}
+            style={{ padding: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
+          />
+        </div>
 
-        {!carregando && !erro && historico.length === 0 && (
-          <p>Nenhuma venda encontrada.</p>
-        )}
+        {/* Botão para limpar filtros caso o usuário queira ver tudo de novo */}
+        <button 
+          onClick={() => { setDataInicio(''); setDataFim(new Date().toISOString().split('T')[0]); }}
+          style={{ 
+            marginTop: '20px',
+            padding: '8px 15px', 
+            backgroundColor: '#e0e0e0', 
+            color: '#333', 
+            border: '1px solid #ccc', 
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px', 
+            fontWeight: 'bold'
+          }}
+        >
+          Limpar Filtros
+        </button>
+      </div>
 
-        {!carregando && !erro && historico.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ marginTop: '20px' }}>
+        {carregando ? (
+          <p style={{ textAlign: 'center', fontSize: '18px' }}>Carregando vendas...</p>
+        ) : erro ? (
+          <p style={{ color: 'red', textAlign: 'center', fontWeight: 'bold' }}>{erro}</p>
+        ) : historico.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#666' }}>Nenhuma venda encontrada para este período.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {historico.map((venda) => (
               <div
                 key={venda.id_venda}
                 style={{
-                  border: '1px solid #ccc',
-                  borderRadius: '10px',
+                  backgroundColor: 'white',
                   padding: '20px',
-                  backgroundColor: '#f9f9f9'
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  borderLeft: '5px solid #28a745',
+                  display: 'flex',
+                  flexDirection: 'column', // ⬅️ Isso faz os elementos empilharem verticalmente
+                  gap: '15px'
                 }}
               >
-                {/* Removemos o display flex daqui para empilhar os itens */}
-                <div style={{ marginBottom: '15px' }}>
-                  <h3 style={{ margin: 0 }}>Venda #{venda.id_venda}</h3>
-                  
+                {/* --- CABEÇALHO DA VENDA (ID, Data e Total) --- */}
+                <div>
+                  <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
+                    Venda #{venda.id_venda}
+                  </h3>
                   <p style={{ margin: '8px 0 5px 0' }}>
                     <strong>Data:</strong>{' '}
-                    {new Date(venda.data_hora + 'Z').toLocaleString('pt-BR')}
+                    {new Date(venda.data_hora).toLocaleString('pt-BR')}
                   </p>
 
-                  {/* Movemos o Total para cá, logo abaixo da data! */}
                   <p
                     style={{
-                      margin: 0,
+                      margin: '10px 0 0 0',
                       fontSize: '20px',
                       fontWeight: 'bold',
-                      color: 'green'
+                      color: '#28a745'
                     }}
                   >
                     Total: R$ {Number(venda.valor_total).toFixed(2)}
                   </p>
                 </div>
 
-                <div>
-                  <h4 style={{ marginBottom: '10px' }}>Itens da venda</h4>
+                {/* --- LISTA DE ITENS EMBAIXO --- */}
+                <div style={{ 
+                  borderTop: '1px solid #eee', // ⬅️ Linha divisória sutil em cima dos itens
+                  paddingTop: '15px' 
+                }}>
+                  <h4 style={{ margin: '0 0 10px 0', color: '#555' }}>Itens da venda</h4>
 
                   {venda.itens && venda.itens.length > 0 ? (
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {venda.itens.map((item, index) => (
-                        <li key={index} style={{ marginBottom: '6px' }}>
-                          {item.nome_prod} - R$ {Number(item.preco_prod).toFixed(2)}
+                        <li key={index} style={{ marginBottom: '8px', fontSize: '15px' }}>
+                          <span style={{ fontWeight: 'bold' }}>{item.quantidade}x</span> {item.nome_prod} 
+                          <span style={{ color: '#888', fontSize: '13px' }}> — R$ {Number(item.preco_prod).toFixed(2)} un.</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p style={{ fontStyle: 'italic', color: '#668' }}>
+                    <p style={{ fontStyle: 'italic', color: '#999', margin: 0 }}>
                       Nenhum item registrado.
                     </p>
                   )}

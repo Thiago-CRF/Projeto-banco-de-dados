@@ -298,10 +298,18 @@ def historico_de_vendas(data_inicio: Optional[datetime] = None,  data_fim: Optio
 
 
 
-# TODO 3:
-# Fazer método de excluir usuário e mudar senha de uma conta. ambos apenas caso gerente esteja logado
+# TODO 4:
 
-# talvez associar a venda ao nome do vendedor. 
+# [FEITO] hisotrico de vendas poder filtrar por datas
+
+# relatorio de produtos ser uma busca pelo historico de vendas, pra resolver o bug de que se o preço 
+# de um produto mudar, o relatorio fica bugado. e poder filtrar por data
+
+
+# TODO 3:
+# associar a venda ao nome do vendedor. 
+
+# Fazer método de excluir usuário e mudar senha de uma conta. ambos apenas caso gerente esteja logado
 
 # fazer um método que pega o relatório completo de uma só venda, como um recibo da venda, incluindo os dados completos da tabela itens_venda. 
 # fazendo método (GET /vendas/{id_venda}) e função no crud detalhes_venda
