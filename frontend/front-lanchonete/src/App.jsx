@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Caixa from './Caixa'; 
 import './index.css';
 
-const URL_BASE = 'http://localhost:8000';
+import { URL_BASE } from './constants'; // import do link da api
 
 function App() {
   // Mudamos visualmente para 'email', mas enviamos como 'username' para a API

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const URL_BASE = 'http://localhost:8000';
+import { URL_BASE } from './constants'; // import do link da api
 
 function HistoricoVendas({ token, onVoltar }) {
   const [historico, setHistorico] = useState([]);

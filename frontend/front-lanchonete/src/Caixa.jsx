@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Configuracoes from './configuracoes';
 
-const URL_BASE = 'http://localhost:8000';
+import { URL_BASE } from './constants'; // import do link da api
 
 function Caixa({ token, onLogout }) {
   const [produtos, setProdutos] = useState([]);
