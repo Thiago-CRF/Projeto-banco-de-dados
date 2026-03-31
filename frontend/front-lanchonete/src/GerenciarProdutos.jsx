@@ -130,6 +130,27 @@ function GerenciarProdutos({ token, onVoltar }) {
     }
   };
 
+  // FUNÇÃO PARA REATIVAR PRODUTO
+const handleReativarProduto = async (id, nomeProduto) => {
+  setMensagem('');
+  try {
+    const response = await fetch(`${URL_BASE}/produtos/${id}`, {
+      method: 'POST', // Usando POST conforme sua API
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      setMensagem(`✅ Produto "${nomeProduto}" reativado com sucesso!`);
+      buscarProdutos(); // Recarrega as listas para o produto "mudar de lado"
+    } else {
+      const data = await response.json();
+      setMensagem(`❌ ${data.detail || 'Erro ao reativar produto.'}`);
+    }
+  } catch (error) {
+    setMensagem('❌ Erro de conexão ao reativar produto.');
+  }
+};
+
   // FUNÇÕES DE EDIÇÃO
   const iniciarEdicao = (produto) => {
     setEditandoId(produto.id);
@@ -454,7 +475,7 @@ function GerenciarProdutos({ token, onVoltar }) {
                             backgroundColor: '#007BFF', 
                             color: '#ffffff', 
                             border: 'none', 
-                            borderRadius: '4px', 
+                            borderRadius: '5px', 
                             cursor: 'pointer', 
                             fontWeight: 'bold' }}
                         >
@@ -467,7 +488,7 @@ function GerenciarProdutos({ token, onVoltar }) {
                             backgroundColor: '#dc3545', 
                             color: 'white', 
                             border: 'none', 
-                            borderRadius: '4px', 
+                            borderRadius: '5px', 
                             cursor: 'pointer', 
                             fontWeight: 'bold' }}
                         >
@@ -527,21 +548,50 @@ function GerenciarProdutos({ token, onVoltar }) {
                       backgroundColor: '#f8f9fa', // Fundo um pouco mais cinza para diferenciar dos ativos
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      gap: '15px' // Adicionei esse gap para não grudar no botão
                     }}
                   >
-                    <div>
-                      <h4 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#6c757d'   }}>
+                    {/* LADO ESQUERDO: Nome, Descrição e Preço juntos */}
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ 
+                        margin: '0 0 5px 0', 
+                        fontSize: '18px', 
+                        color: '#6c757d' }}>
                         {produto.nome}
                       </h4>
-                      <p style={{ margin: 0, color: '#888', fontSize: '14px' }}>
+                      <p style={{ 
+                        margin: '0 0 5px 0', 
+                        color: '#888', 
+                        fontSize: '14px' }}>
                         {produto.desc || 'Sem descrição'}
                       </p>
-                    </div>
-                    <div>
-                       <p style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#6c757d' }}>
+                      
+                      <p style={{ 
+                        margin: 0, 
+                        fontSize: '18px', 
+                        fontWeight: 'bold', 
+                        color: '#6c757d' }}>
                         R$ {Number(produto.preco).toFixed(2)}
                       </p>
+                    </div>
+
+                    {/* LADO DIREITO: Apenas o botão de Reativar */}
+                    <div>
+                      <button
+                        onClick={() => handleReativarProduto(produto.id, produto.nome)}
+                        style={{
+                          padding: '8px 15px',
+                          backgroundColor: '#28a745', // Verde
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '5px',
+                          cursor: 'pointer',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        Reativar
+                      </button>
                     </div>
                   </div>
                 ))

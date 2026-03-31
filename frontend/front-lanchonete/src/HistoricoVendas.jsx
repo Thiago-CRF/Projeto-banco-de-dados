@@ -200,9 +200,13 @@ function HistoricoVendas({ token, onVoltar }) {
                   {venda.itens && venda.itens.length > 0 ? (
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {venda.itens.map((item, index) => (
-                        <li key={index} style={{ marginBottom: '8px', fontSize: '15px' }}>
-                          <span style={{ fontWeight: 'bold' }}>{item.quantidade}x</span> {item.nome_prod} 
-                          <span style={{ color: '#888', fontSize: '13px' }}> — R$ {Number(item.preco_prod).toFixed(2)} un.</span>
+                        <li key={index} style={{ marginBottom: '8px', fontSize: '16px' }}>
+                          
+                          <span style={{ fontWeight: 'bold' }}>
+                            {item.quantidade}x</span> {item.nome_prod} 
+                          
+                          <span style={{ color: '#888', fontSize: '14px', marginLeft: '5px' }}> 
+                            — R$ {Number(item.preco_prod).toFixed(2)} un.</span>
                         </li>
                       ))}
                     </ul>

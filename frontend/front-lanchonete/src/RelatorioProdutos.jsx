@@ -184,9 +184,25 @@ function RelatorioProdutos({ token, onVoltar }) {
                 ))}
               </tbody>
               <tfoot>
-                <tr style={{ backgroundColor: '#e9ecef', fontWeight: 'bold', fontSize: '18px' }}>
-                  <td colSpan="4" style={{ padding: '15px', textAlign: 'right' }}>Receita Total do Período:</td>
-                  <td style={{ padding: '15px', color: '#28a745' }}>R$ {totalGeral.toFixed(2)}</td>
+                <tr style={{ fontWeight: 'bold', fontSize: '18px' }}>
+                  {/* Tiramos o padding lateral do <td> (ficou 0) para controlar no bloco cinza */}
+                  <td colSpan="5" style={{ padding: '15px 0', textAlign: 'left' }}>
+                    
+                    {/* Trocamos o span por uma div com inline-block e margem de 12px exata */}
+                    <div style={{ 
+                      backgroundColor: '#e9ecef', 
+                      padding: '10px 15px', 
+                      borderRadius: '6px',
+                      display: 'inline-block',
+                      marginLeft: '8px' // Isso alinha a borda cinza exatamente com o #
+                    }}>
+                      Receita Total do Período:{' '}
+                      <span style={{ color: '#28a745', marginLeft: '5px' }}>
+                        R$ {totalGeral.toFixed(2)}
+                      </span>
+                    </div>
+
+                  </td>
                 </tr>
               </tfoot>
             </table>
