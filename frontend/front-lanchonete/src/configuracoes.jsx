@@ -55,7 +55,7 @@ function Configuracoes({ token, onVoltar }) {
             backgroundColor: '#007BFF',
             color: 'white',
             border: 'none',
-            borderRadius: '5px',
+            borderRadius: '6px',
             fontWeight: 'bold',
             fontSize: '14px'
           }}

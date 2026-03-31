@@ -148,21 +148,21 @@ function Caixa({ token, onLogout }) {
           marginBottom: '20px'
         }}
       >
-        <h2 style={{ margin: 0, color: '#333' }}>Caixa - Lanchonete</h2>
+        <h2 style={{ margin: 0, color: '#333' }}>💲 Caixa - Lanchonete</h2>
 
         {/* Botões do cabeçalho aumentados */}
         <div style={{ display: 'flex', gap: '15px' }}>
           <button
             onClick={() => setTelaAtual('config')}
             style={{
-              padding: '12px 20px', // Aumentado
+              padding: '10px 18px', // Aumentado
               cursor: 'pointer',
               backgroundColor: '#007BFF',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
               fontWeight: 'bold',
-              fontSize: '16px', // Fonte maior
+              fontSize: '14px', // Fonte maior
               transition: 'background-color 0.2s'
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0063ce'}
@@ -174,14 +174,14 @@ function Caixa({ token, onLogout }) {
           <button
             onClick={onLogout}
             style={{
-              padding: '12px 20px', // Aumentado
+              padding: '10px 18px', // Aumentado
               cursor: 'pointer',
               backgroundColor: '#dc3545', // Mantive vermelho por ser ação de sair/perigo
               color: 'white',
               border: 'none',
               borderRadius: '6px',
               fontWeight: 'bold',
-              fontSize: '16px', // Fonte maior
+              fontSize: '14px', // Fonte maior
               transition: 'background-color 0.2s'
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c82333'}

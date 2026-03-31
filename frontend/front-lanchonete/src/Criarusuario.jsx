@@ -90,6 +90,10 @@ function CriarUsuario({ token, onVoltar }) {
         </button>
 
         <h2 style={{ textAlign: 'center', marginTop: '15px', marginBottom: '25px', color: '#333' }}>
+          {/* Adicionamos o emoji em um span com display block para garantir que quebre a linha */}
+          <span style={{ display: 'block', fontSize: '40px', marginBottom: '10px' }}>
+            👤
+          </span>
           Criar Usuário
         </h2>
 

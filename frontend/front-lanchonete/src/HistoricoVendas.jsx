@@ -41,30 +41,33 @@ function HistoricoVendas({ token, onVoltar }) {
   }, [token]);
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: '20px', backgroundColor: '#f4f4f9', minHeight: '100vh', boxSizing: 'border-box' }}>
       <header
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           borderBottom: '2px solid #ccc',
-          paddingBottom: '10px'
+          paddingBottom: '15px',
+          marginBottom: '30px'
         }}
       >
-        <h2>Histórico de Vendas</h2>
+        <h2 style={{ margin: 0, color: '#333' }}>🧾 Histórico de Vendas</h2>
 
         <button
           onClick={onVoltar}
           style={{
-            padding: '8px 15px',
+            padding: '10px 18px',
             cursor: 'pointer',
             backgroundColor: '#007BFF',
             color: 'white',
             border: 'none',
-            borderRadius: '5px'
+            borderRadius: '6px',
+            fontWeight: 'bold',
+            fontSize: '14px'
           }}
         >
-          Voltar
+          ← Voltar para as Configurações
         </button>
       </header>
 
