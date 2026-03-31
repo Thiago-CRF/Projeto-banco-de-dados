@@ -175,6 +175,16 @@ def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
 
+# reativar produto
+@app.post("/produtos/{id_prod}")
+def reativa_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
+    try:
+        return {"Retorno": adm.reativar_prod(id_prod)}
+    # se o id não for encontrado, pega o erro na função do banco do crud
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+
+
 # relatório de venda dos produtos (filtrando por data agora)
 @app.get("/produtos/relatorio", response_model=list[schemas.RelatorioProduto])
 def relatorio_vendas_produtos(data_inicio: Optional[datetime] = None,  data_fim: Optional[datetime] = None,
@@ -270,7 +280,7 @@ def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
     return prod_formatados
 
 
-# lista todos os produtos do banco
+# lista todos os produtos inativos (excluidos) do banco
 @app.get("/produtos/inativos", response_model=list[schemas.Produto])
 def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
     

@@ -191,6 +191,21 @@ class Gerente(Vendedor):
         self.con.commit()
 
         return f"Produto de id: {id_produto} removido"
+    
+    # reativa um produto excluido
+    def reativar_prod(self, id_produto):
+        self.cur.execute("""
+            UPDATE produtos
+            SET ativo = TRUE
+            WHERE id_prod = %s""", (id_produto,)
+            )
+        
+        if self.cur.rowcount == 0:
+            raise ValueError(f"Produto de id: '{id_produto}' não encontrado para reativação")
+
+        self.con.commit()
+
+        return f"Produto de id: {id_produto} reativado"
 
     # 'gerar relatório' gera o relatório de vendas dos produtos, com quantidade vendida, 
     # valor vendido e valor total. De cada produto

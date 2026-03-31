@@ -4,6 +4,9 @@ const URL_BASE = 'http://localhost:8000';
 
 function GerenciarProdutos({ token, onVoltar }) {
   const [produtos, setProdutos] = useState([]);
+  const [produtosInativos, setProdutosInativos] = useState([]); // ESTADO PARA INATIVOS
+  const [mostrarInativos, setMostrarInativos] = useState(false); // CONTROLA SE A LISTA ESTÁ ABERTA OU FECHADA
+
   const [mensagem, setMensagem] = useState('');
   const [carregando, setCarregando] = useState(true);
 
@@ -27,17 +30,32 @@ function GerenciarProdutos({ token, onVoltar }) {
   const buscarProdutos = async () => {
     try {
       setCarregando(true);
-      const response = await fetch(`${URL_BASE}/produtos`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await response.json();
+      
+      // Busca os ativos e inativos ao mesmo tempo
+      const [resAtivos, resInativos] = await Promise.all([
+        fetch(`${URL_BASE}/produtos`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetch(`${URL_BASE}/produtos/inativos`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
 
-      if (response.ok) {
-        setProdutos(data);
+      const dataAtivos = await resAtivos.json();
+      const dataInativos = await resInativos.json();
+
+      if (resAtivos.ok) {
+        setProdutos(dataAtivos);
       } else {
-        setMensagem(`❌ ${data.detail || 'Erro ao listar produtos.'}`);
+        setMensagem(`❌ ${dataAtivos.detail || 'Erro ao listar produtos ativos.'}`);
       }
+
+      if (resInativos.ok) {
+        setProdutosInativos(dataInativos);
+      }
+
     } catch (error) {
       setMensagem('❌ Erro de conexão ao buscar produtos.');
     } finally {
@@ -463,6 +481,76 @@ function GerenciarProdutos({ token, onVoltar }) {
             )}
           </div>
         )}
+
+        {/* ⬇️ NOVA SEÇÃO DE PRODUTOS INATIVOS (ESCONDIDA) ⬇️ */}
+        <div style={{ marginTop: '40px', borderTop: '2px solid #ccc', paddingTop: '20px' }}>
+          
+          {/* Cabeçalho clicável para expandir/recolher */}
+          <div 
+            onClick={() => setMostrarInativos(!mostrarInativos)}
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              cursor: 'pointer',
+              padding: '10px 15px',
+              backgroundColor: '#e9ecef',
+              borderRadius: '8px',
+              transition: '0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#dee2e6'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#e9ecef'}
+          >
+            <h3 style={{ margin: 0, color: '#555', fontSize: '18px' }}>
+              📁 Produtos Excluídos (Inativos)
+            </h3>
+            <span style={{ fontWeight: 'bold', color: '#555' }}>
+              {mostrarInativos ? '▲ Ocultar' : '▼ Mostrar'}
+            </span>
+          </div>
+
+          {/* Lista que só aparece se mostrarInativos for TRUE */}
+          {mostrarInativos && (
+            <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {produtosInativos.length === 0 ? (
+                <p style={{ color: '#666', fontStyle: 'italic', paddingLeft: '5px' }}>
+                  Nenhum produto excluído encontrado.
+                </p>
+              ) : (
+                produtosInativos.map((produto) => (
+                  <div
+                    key={produto.id}
+                    style={{
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      padding: '12px 20px',
+                      backgroundColor: '#f8f9fa', // Fundo um pouco mais cinza para diferenciar dos ativos
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <h4 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#6c757d'   }}>
+                        {produto.nome}
+                      </h4>
+                      <p style={{ margin: 0, color: '#888', fontSize: '14px' }}>
+                        {produto.desc || 'Sem descrição'}
+                      </p>
+                    </div>
+                    <div>
+                       <p style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#6c757d' }}>
+                        R$ {Number(produto.preco).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+        {/* ⬆️ FIM DA SEÇÃO DE PRODUTOS INATIVOS ⬆️ */}
+
       </div>
     </div>
   );
