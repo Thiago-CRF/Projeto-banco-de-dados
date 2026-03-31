@@ -175,7 +175,7 @@ def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
 
-# relatório de venda dos produtos (primeiro simples, depois filtra por data)
+# relatório de venda dos produtos (filtrando por data agora)
 @app.get("/produtos/relatorio", response_model=list[schemas.RelatorioProduto])
 def relatorio_vendas_produtos(data_inicio: Optional[datetime] = None,  data_fim: Optional[datetime] = None,
                               adm: crud.Gerente = Depends(get_gerente)):
@@ -184,7 +184,7 @@ def relatorio_vendas_produtos(data_inicio: Optional[datetime] = None,  data_fim:
         relatorio = adm.relatorio_vendas(data_inicio, data_fim)
 
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
 
     relatorio_formatado = []
     for i in relatorio:

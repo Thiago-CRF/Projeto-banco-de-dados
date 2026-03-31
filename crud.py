@@ -183,6 +183,7 @@ class Gerente(Vendedor):
             SUM(I.quantidade * I.preco_unid) AS valor_vendido
             FROM itens_venda I
             INNER JOIN produtos P ON P.id_prod = I.id_produto
+            INNER JOIN vendas V ON I.id_venda = V.id_venda
         """
         # inner join pra melhorar a consulta e buscar no itens_enda
 
