@@ -110,7 +110,7 @@ function Caixa({ token, onLogout }) {
     }));
 
     try {
-      const response = await fetch(`${URL_BASE}/vendas`, {
+      const response = await fetch(`${URL_BASE}/venda`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

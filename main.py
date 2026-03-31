@@ -3,6 +3,8 @@ import database
 import crud
 import schemas
 import auth
+from typing import Optional
+from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -262,12 +264,13 @@ def detalhes_produto(id_prod: int, vend: crud.Vendedor = Depends(get_vendedor)):
     
     return prod_formatado
 
-# histórico de vendas, começando na mais recente. Talvez deixar só pro ADM
+# histórico de vendas, começando na mais recente. Deixei só pro ADM (painel administração)
 @app.get("/venda/historico", response_model=list[schemas.HistoricoVenda])
-def historico_de_vendas(vend: crud.Vendedor = Depends(get_vendedor)):
+def historico_de_vendas(data_inicio: Optional[datetime] = None,  data_fim: Optional[datetime] = None, 
+                        adm: crud.Gerente = Depends(get_gerente)):
 
     try:
-        historico_bruto = vend.historico_vendas()
+        historico_bruto = adm.historico_vendas(data_inicio, data_fim)
 
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
@@ -281,13 +284,14 @@ def historico_de_vendas(vend: crud.Vendedor = Depends(get_vendedor)):
             historico_formatado[id_venda] = {
                 "id_venda": i[0],
                 "data_hora": i[1],
-                "valor_total": i[2],
+                "valor_total": float(i[2]),
                 "itens": []
             }
         
         historico_formatado[id_venda]["itens"].append({
             "nome_prod": i[3],
-            "preco_prod": i[4]
+            "preco_prod": float(i[4]),
+            "quantidade": i[5]
         })
 
     return list(historico_formatado.values())

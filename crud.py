@@ -1,4 +1,6 @@
 import psycopg2
+from datetime import datetime
+
 import database
 from schemas import Produto, ProdutoVenda, CreateUser
 
@@ -124,19 +126,27 @@ class Vendedor:
         return f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada."
     
     # histórico de vendas
-    def historico_vendas(self):
-        # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço)
-        self.cur.execute("""
-            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
+    def historico_vendas(self, data_inicio: datetime = None, data_fim: datetime = None):
+        # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço e quantidade)
+        sql_base = """
+            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid, I.quantidade
             FROM vendas V
             INNER JOIN itens_venda I ON V.id_venda = I.id_venda
             INNER JOIN produtos P ON P.id_prod = I.id_produto
-            WHERE I.id_venda = V.id_venda and P.id_prod = I.id_produto
-            ORDER BY V.data_hora DESC, V.id_venda DESC"""
-            )
-        historico = self.cur.fetchall()
+        """
         # inner join pra facilitar na consulta
-        
+
+        datas_list = []
+        # adiciona o filtro se as datas forem enviadas
+        if data_inicio and data_fim:
+            sql_base += " WHERE V.data_hora BETWEEN %s AND %s "
+            datas_list = [data_inicio, data_fim]
+
+        sql_base += " ORDER BY V.data_hora DESC, V.id_venda DESC"
+
+        self.cur.execute(sql_base, datas_list)
+        historico = self.cur.fetchall()
+
         if not historico:
             raise ValueError(f"Nenhuma venda encontrada para exibição")
         
