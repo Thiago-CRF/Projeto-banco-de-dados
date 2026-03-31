@@ -191,9 +191,9 @@ def relatorio_vendas_produtos(data_inicio: Optional[datetime] = None,  data_fim:
         relatorio_dict = {
             "id": i[0],
             "nome": i[1],
-            "preco": i[2],
+            "preco": float(i[2]),
             "qnt_vendida": i[3],
-            "valor_vendido": i[4]
+            "valor_vendido": float(i[4])
         }
         relatorio_formatado.append(relatorio_dict)
 
