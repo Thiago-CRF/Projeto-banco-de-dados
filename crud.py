@@ -125,32 +125,6 @@ class Vendedor:
 
         return f"Venda de id: {id_venda} com valor total: R${soma_valores:.2f} registrada."
     
-    # histórico de vendas
-    def historico_vendas(self, data_inicio: datetime = None, data_fim: datetime = None):
-        # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço e quantidade)
-        sql_base = """
-            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid, I.quantidade
-            FROM vendas V
-            INNER JOIN itens_venda I ON V.id_venda = I.id_venda
-            INNER JOIN produtos P ON P.id_prod = I.id_produto
-        """
-        # inner join pra facilitar na consulta
-
-        datas_list = []
-        # adiciona o filtro se as datas forem enviadas
-        if data_inicio and data_fim:
-            sql_base += " WHERE V.data_hora BETWEEN %s AND %s "
-            datas_list = [data_inicio, data_fim]
-
-        sql_base += " ORDER BY V.data_hora DESC, V.id_venda DESC"
-
-        self.cur.execute(sql_base, datas_list)
-        historico = self.cur.fetchall()
-
-        if not historico:
-            raise ValueError(f"Nenhuma venda encontrada para exibição")
-        
-        return historico
 
 class Gerente(Vendedor):
     # criar métodos de gerenciamento da lanchonete:
@@ -201,17 +175,60 @@ class Gerente(Vendedor):
 
     # 'gerar relatório' gera o relatório de vendas dos produtos, com quantidade vendida, 
     # valor vendido e valor total. De cada produto
-    def relatorio_vendas(self):
+    def relatorio_vendas(self, data_inicio: datetime = None, data_fim: datetime = None):
     # fazer calculo dos valores com código SQL
-        self.cur.execute("""
-            SELECT id_prod, nome, preco, qnt_vendida, (preco * qnt_vendida) AS valor_vendido 
-            FROM produtos
-            WHERE qnt_vendida > 0
-            ORDER BY valor_vendido DESC
-            """)
-        
+        sql_base = """
+            SELECT P.id_prod, P.nome, I.preco_unid AS preco, 
+            SUM(I.quantidade) AS qnt_vendida, 
+            SUM(I.quantidade * I.preco_unid) AS valor_vendido
+            FROM itens_venda I
+            INNER JOIN produtos P ON P.id_prod = I.id_produto
+        """
+        # inner join pra melhorar a consulta e buscar no itens_enda
+
+        datas_list = []
+        # adiciona o filtro se as datas forem enviadas
+        if data_inicio and data_fim:
+            sql_base += " WHERE V.data_hora BETWEEN %s AND %s "
+            datas_list = [data_inicio, data_fim]
+
+        sql_base += " GROUP BY P.id_prod, P.nome, I.preco_unid "
+        sql_base += " ORDER BY valor_vendido DESC"
+
+        self.cur.execute(sql_base, datas_list)
         relatorio = self.cur.fetchall()
+
+        if not relatorio:
+            raise ValueError(f"Nenhuma venda encontrada para exibição")
+        
         return relatorio
+    
+        # histórico de vendas
+    def historico_vendas(self, data_inicio: datetime = None, data_fim: datetime = None):
+        # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço e quantidade)
+        sql_base = """
+            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid, I.quantidade
+            FROM vendas V
+            INNER JOIN itens_venda I ON V.id_venda = I.id_venda
+            INNER JOIN produtos P ON P.id_prod = I.id_produto
+        """
+        # inner join pra facilitar na consulta
+
+        datas_list = []
+        # adiciona o filtro se as datas forem enviadas
+        if data_inicio and data_fim:
+            sql_base += " WHERE V.data_hora BETWEEN %s AND %s "
+            datas_list = [data_inicio, data_fim]
+
+        sql_base += " ORDER BY V.data_hora DESC, V.id_venda DESC"
+
+        self.cur.execute(sql_base, datas_list)
+        historico = self.cur.fetchall()
+
+        if not historico:
+            raise ValueError(f"Nenhuma venda encontrada para exibição")
+        
+        return historico
     
     # retorna None (lista vazia) se o usuário não existir e o id de usuário se ele já existir
     def verificar_username(self, username: str):

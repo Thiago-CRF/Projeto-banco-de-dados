@@ -135,6 +135,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: crud.Gerente = D
     return {"access_token": token_acesso, "token_type": "bearer"}
 
 
+
+
 # métodos de manipulação dos produtos (GERENTE)
 
 # Inserir produto no banco 
@@ -149,6 +151,7 @@ def criar_produto(produto: schemas.ProdutoBase, adm: crud.Gerente = Depends(get_
 
     return {"Retorno": f"Produto de nome '{produto.nome}' inserido no banco de dados"}
 
+
 # Modifica os atributos de um produto do banco. Exceto a quantidade vendida.
 @app.put("/produtos/{id_prod}")
 def atualizar_produto(produto_att: schemas.ProdutoBase, id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
@@ -160,6 +163,7 @@ def atualizar_produto(produto_att: schemas.ProdutoBase, id_prod: int, adm: crud.
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
+
 # exclui um produto do banco de dados
 @app.delete("/produtos/{id_prod}")
 def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
@@ -170,99 +174,31 @@ def delete_produto(id_prod: int, adm: crud.Gerente = Depends(get_gerente)):
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     
+
 # relatório de venda dos produtos (primeiro simples, depois filtra por data)
 @app.get("/produtos/relatorio", response_model=list[schemas.RelatorioProduto])
-def relatorio_vendas_produtos(adm: crud.Gerente = Depends(get_gerente)):
-
-    relatorio = adm.relatorio_vendas()
-
-    if relatorio == None:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail=("Nenhuma produto com venda registrada"))
-    else:
-        relatorio_formatado = []
-        for i in relatorio:
-            relatorio_dict = {
-                "id": i[0],
-                "nome": i[1],
-                "preco": i[2],
-                "qnt_vendida": i[3],
-                "valor_vendido": i[4]
-            }
-            relatorio_formatado.append(relatorio_dict)
-
-        return relatorio_formatado
-
-
-# métodos de manipulação das vendas / pesquisa (VENDEDOR E GERENTE)
-
-# registra uma venda no banco de dados
-@app.post("/venda")
-def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor = Depends(get_vendedor)):
-    # envia uma lista de Objetos pydantic ProdutoVenda
-    try:
-        # registra a venda e retorna formato JSON pra facilitar no retorno da API
-        return {"Retorno": vend.registrar_venda(produtos_venda)}
-
-    except ValueError as err:
-        # se acontecer de ter o ValueError do id enviado estar errado, vai pegar o erro e subir uma exceção HTTP mostrando a mensagem  
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
-    
-# lista todos os produtos do banco
-@app.get("/produtos", response_model=list[schemas.Produto])
-def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
-    
-    produtos = vend.listar_todos()
-
-    prod_formatados = []
-    for i in produtos:
-        prod_dict = {
-            "id": i[0],
-            "nome": i[1],
-            "desc": i[2],
-            "preco": i[3],
-            "qnt_vendida": i[4]
-        }
-        prod_formatados.append(prod_dict)
-
-    return prod_formatados
-
-# pesquisa produtos por nome
-@app.get("/produtos/pesquisa", response_model=list[schemas.Produto])
-def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Vendedor = Depends(get_vendedor)):
-
-    res_pesquisa = vend.pesquisar_prod_por_nome(nome_pesquisa)
-
-    pesquisa_formatada = []
-    for i in res_pesquisa:
-        prod_dict = {
-            "id": i[0],
-            "nome": i[1],
-            "desc": i[2],
-            "preco": i[3],
-            "qnt_vendida": i[4]
-        }
-        pesquisa_formatada.append(prod_dict)
-
-    return pesquisa_formatada
-
-@app.get("/produtos/{id_prod}", response_model=schemas.Produto)
-def detalhes_produto(id_prod: int, vend: crud.Vendedor = Depends(get_vendedor)):
+def relatorio_vendas_produtos(data_inicio: Optional[datetime] = None,  data_fim: Optional[datetime] = None,
+                              adm: crud.Gerente = Depends(get_gerente)):
 
     try:
-        dados_produto = vend.mostrar_um_produto(id_prod)
+        relatorio = adm.relatorio_vendas(data_inicio, data_fim)
 
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail=str(err))
 
-    prod_formatado = {  # TRANSFORMAR FORMATAÇÃO EM UM FUNÇÃO
-            "id": dados_produto[0],
-            "nome": dados_produto[1],
-            "desc": dados_produto[2],
-            "preco": dados_produto[3],
-            "qnt_vendida": dados_produto[4]
+    relatorio_formatado = []
+    for i in relatorio:
+        relatorio_dict = {
+            "id": i[0],
+            "nome": i[1],
+            "preco": i[2],
+            "qnt_vendida": i[3],
+            "valor_vendido": i[4]
         }
-    
-    return prod_formatado
+        relatorio_formatado.append(relatorio_dict)
+
+    return relatorio_formatado
+
 
 # histórico de vendas, começando na mais recente. Deixei só pro ADM (painel administração)
 @app.get("/venda/historico", response_model=list[schemas.HistoricoVenda])
@@ -295,6 +231,85 @@ def historico_de_vendas(data_inicio: Optional[datetime] = None,  data_fim: Optio
         })
 
     return list(historico_formatado.values())
+
+
+
+
+# métodos de manipulação das vendas / pesquisa (VENDEDOR E GERENTE)
+
+# registra uma venda no banco de dados
+@app.post("/venda")
+def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor = Depends(get_vendedor)):
+    # envia uma lista de Objetos pydantic ProdutoVenda
+    try:
+        # registra a venda e retorna formato JSON pra facilitar no retorno da API
+        return {"Retorno": vend.registrar_venda(produtos_venda)}
+
+    except ValueError as err:
+        # se acontecer de ter o ValueError do id enviado estar errado, vai pegar o erro e subir uma exceção HTTP mostrando a mensagem  
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    
+
+# lista todos os produtos do banco
+@app.get("/produtos", response_model=list[schemas.Produto])
+def listar_produtos(vend: crud.Vendedor = Depends(get_vendedor)):
+    
+    produtos = vend.listar_todos()
+
+    prod_formatados = []
+    for i in produtos:
+        prod_dict = {
+            "id": i[0],
+            "nome": i[1],
+            "desc": i[2],
+            "preco": i[3],
+            "qnt_vendida": i[4]
+        }
+        prod_formatados.append(prod_dict)
+
+    return prod_formatados
+
+
+# pesquisa produtos por nome
+@app.get("/produtos/pesquisa", response_model=list[schemas.Produto])
+def pesquisa_por_nome(nome_pesquisa: str, vend: crud.Vendedor = Depends(get_vendedor)):
+
+    res_pesquisa = vend.pesquisar_prod_por_nome(nome_pesquisa)
+
+    pesquisa_formatada = []
+    for i in res_pesquisa:
+        prod_dict = {
+            "id": i[0],
+            "nome": i[1],
+            "desc": i[2],
+            "preco": i[3],
+            "qnt_vendida": i[4]
+        }
+        pesquisa_formatada.append(prod_dict)
+
+    return pesquisa_formatada
+
+
+# busca os detalhes de um só produto
+@app.get("/produtos/{id_prod}", response_model=schemas.Produto)
+def detalhes_produto(id_prod: int, vend: crud.Vendedor = Depends(get_vendedor)):
+
+    try:
+        dados_produto = vend.mostrar_um_produto(id_prod)
+
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+
+    prod_formatado = {  # TRANSFORMAR FORMATAÇÃO EM UM FUNÇÃO
+            "id": dados_produto[0],
+            "nome": dados_produto[1],
+            "desc": dados_produto[2],
+            "preco": dados_produto[3],
+            "qnt_vendida": dados_produto[4]
+        }
+    
+    return prod_formatado
+
 
 
 
