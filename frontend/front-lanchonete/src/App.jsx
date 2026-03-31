@@ -1,16 +1,19 @@
 import { useState } from 'react';
-import Caixa from './Caixa'; // Importamos a tela nova que acabamos de criar!
+import Caixa from './Caixa'; 
 import './index.css';
 
 const URL_BASE = 'http://localhost:8000';
 
 function App() {
-  const [username, setUsername] = useState('');
+  // Mudamos visualmente para 'email', mas enviamos como 'username' para a API
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [erro, setErro] = useState('');
   
-  // NOVO ESTADO: Ele já começa tentando ler o token do LocalStorage
   const [token, setToken] = useState(localStorage.getItem('token'));
+
+  // Estado para controlar o efeito hover do botão (JS inline)
+  const [btnHover, setBtnHover] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,7 +21,8 @@ function App() {
 
     try {
       const formData = new URLSearchParams();
-      formData.append('username', username);
+      // O backend do FastAPI/OAuth2 exige que a chave seja "username"
+      formData.append('username', email); 
       formData.append('password', password);
 
       const response = await fetch(`${URL_BASE}/login`, {
@@ -27,61 +31,126 @@ function App() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Usuário ou senha incorretos!');
+      if (!response.ok) throw new Error('E-mail ou senha incorretos!');
 
       const data = await response.json();
 
       localStorage.setItem('token', data.access_token);
-      setToken(data.access_token); // NOVO: Atualiza a memória com o token, forçando a tela a mudar!
+      setToken(data.access_token); 
 
     } catch (error) {
       setErro(error.message);
     }
   };
 
-  // NOVO: Função para deslogar (apaga o token do navegador e da memória)
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
   };
 
-  // RENDERIZAÇÃO CONDICIONAL: 
-  // Se a variável 'token' existir (usuário logado), mostre o <Caixa />
+  // Se o usuário estiver logado, mostra a tela do Caixa
   if (token) {
     return <Caixa token={token} onLogout={handleLogout} />;
   }
 
-  // Se o código chegou até aqui (não tem token), mostre a tela de login
-  // 4. O VISUAL (JSX): O que vai aparecer na tela
+  // Se NÃO estiver logado, mostra a tela de Login com o novo visual
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px' }}>
-      <h2>Login - Sistema da Lanchonete</h2>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh', // Ocupa a altura toda da tela
+      backgroundColor: '#f4f4f9', // Cor de fundo suave igual a Criar Usuário
+      padding: '20px',
+      boxSizing: 'border-box'
+    }}>
+      {/* O "Cartão" de Login */}
+      <div style={{
+        backgroundColor: 'white',
+        padding: '40px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', // Sombra leve
+        width: '100%',
+        maxWidth: '400px' // Largura máxima do cartão
+      }}>
+        
+        <h2 style={{ 
+          textAlign: 'center', 
+          marginTop: 0, 
+          marginBottom: '30px', 
+          color: '#333',
+          fontSize: '28px'
+        }}>
+          Login - Lanchonete
+        </h2>
 
-      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '300px' }}>
-        
-        <input 
-        type="text" 
-        placeholder="Nome de Usuário" 
-        value={username} 
-        onChange={(e) => setUsername(e.target.value)} // atualiza o estado a cada letra digitada (onChange)
-        required 
-        style={{ padding: '10px' }} 
-        />
-        
-        <input 
-        type="password" 
-        placeholder="Senha" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} // atualiza o estado a cada letra digitada (onChange)
-        required 
-        style={{ padding: '10px' }} 
-        />
-        
-        <button type="submit" style={{ padding: '10px', cursor: 'pointer' }}>Entrar</button>
-      </form>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          
+          <input 
+            type="text" // type text pra receber contas especiais ainda (como admin)
+            placeholder="E-mail" // visualmente pede E-mail
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)}
+            required 
+            style={{ 
+              padding: '12px',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              fontSize: '16px'
+            }} 
+          />
+          
+          <input 
+            type="password" 
+            placeholder="Senha" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)}
+            required 
+            style={{ 
+              padding: '12px',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              fontSize: '16px'
+            }} 
+          />
+          
+          <button 
+            type="submit" 
+            style={{ 
+              padding: '14px',
+              backgroundColor: btnHover ? '#0063ce' : '#007BFF', // Efeito hover roxo
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '16px',
+              marginTop: '10px',
+              transition: 'background-color 0.2s' // Animação suave da cor
+            }}
+            onMouseOver={() => setBtnHover(true)}
+            onMouseOut={() => setBtnHover(false)}
+          >
+            Entrar
+          </button>
+        </form>
 
-      {/* Se a variável 'erro' tiver algum texto, mostra este parágrafo em vermelho */}
-      {erro && <p style={{ color: 'red', fontWeight: 'bold' }}>{erro}</p>}
+        {/* Mensagem de erro estilizada em vermelho igual a Criar Usuário */}
+        {erro && (
+          <p style={{ 
+            color: '#721c24', 
+            fontWeight: 'bold', 
+            textAlign: 'center',
+            marginTop: '20px',
+            padding: '10px',
+            backgroundColor: '#f8d7da',
+            borderRadius: '5px',
+            border: '1px solid #f5c6cb'
+          }}>
+            ❌ {erro}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
