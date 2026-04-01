@@ -32,7 +32,8 @@ def criar_banco():
         CREATE TABLE IF NOT EXISTS vendas (
         id_venda SERIAL PRIMARY KEY,
         data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        valor_total DECIMAL(8, 2) NOT NULL
+        valor_total DECIMAL(8, 2) NOT NULL,
+        pagamento VARCHAR(20) NOT NULL
         );
         """
 

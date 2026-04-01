@@ -1,6 +1,13 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
+from enum import Enum
+
+class TipoPagamento(str, Enum):
+    pix = "pix"
+    credito = "crédito"
+    debito = "débito"
+    dinheiro = "dinheiro"
 
 class ProdutoBase(BaseModel):
     nome: str
@@ -29,6 +36,11 @@ class VendaBase(BaseModel):
     id_venda: int
     data_hora: datetime
     valor_total: float
+    pagamento: TipoPagamento
+
+class PedidoVenda(BaseModel):
+    produtos: list[ProdutoVenda]
+    pagamento: TipoPagamento
 
 # SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid
 class HistoricoVenda(VendaBase): 

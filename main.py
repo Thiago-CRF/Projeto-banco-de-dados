@@ -231,13 +231,14 @@ def historico_de_vendas(data_inicio: Optional[datetime] = None,  data_fim: Optio
                 "id_venda": i[0],
                 "data_hora": i[1],
                 "valor_total": float(i[2]),
+                "pagamento": i[3],
                 "itens": []
             }
         
         historico_formatado[id_venda]["itens"].append({
-            "nome_prod": i[3],
-            "preco_prod": float(i[4]),
-            "quantidade": i[5]
+            "nome_prod": i[4],
+            "preco_prod": float(i[5]),
+            "quantidade": i[6]
         })
 
     return list(historico_formatado.values())
@@ -249,11 +250,11 @@ def historico_de_vendas(data_inicio: Optional[datetime] = None,  data_fim: Optio
 
 # registra uma venda no banco de dados
 @app.post("/venda")
-def criar_venda(produtos_venda: list[schemas.ProdutoVenda], vend: crud.Vendedor = Depends(get_vendedor)):
+def criar_venda(pedido: schemas.PedidoVenda, vend: crud.Vendedor = Depends(get_vendedor)):
     # envia uma lista de Objetos pydantic ProdutoVenda
     try:
         # registra a venda e retorna formato JSON pra facilitar no retorno da API
-        return {"Retorno": vend.registrar_venda(produtos_venda)}
+        return {"Retorno": vend.registrar_venda(pedido.produtos, pedido.pagamento)}
 
     except ValueError as err:
         # se acontecer de ter o ValueError do id enviado estar errado, vai pegar o erro e subir uma exceção HTTP mostrando a mensagem  

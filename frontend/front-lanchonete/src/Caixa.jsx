@@ -8,6 +8,7 @@ function Caixa({ token, onLogout }) {
   const [carrinho, setCarrinho] = useState([]);
   const [termoBusca, setTermoBusca] = useState('');
   const [telaAtual, setTelaAtual] = useState('caixa');
+  const [formaPagamento, setFormaPagamento] = useState('pix');
 
   const realizarBusca = async () => {
     try {
@@ -109,6 +110,12 @@ function Caixa({ token, onLogout }) {
       qnt_venda: item.quantidade
     }));
 
+    // ⬇️ MODIFICADO: Agora envia os produtos e a forma de pagamento
+    const payload = {
+      produtos: itensVenda,
+      pagamento: formaPagamento
+    };
+
     try {
       const response = await fetch(`${URL_BASE}/venda`, {
         method: 'POST',
@@ -116,12 +123,13 @@ function Caixa({ token, onLogout }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(itensVenda)
+        body: JSON.stringify(payload) // ⬇️ MODIFICADO: Envia o payload
       });
 
       if (response.ok) {
         alert('✅ Venda finalizada com sucesso!');
         setCarrinho([]);
+        setFormaPagamento('pix'); // Reseta a forma de pagamento
       } else {
         const data = await response.json();
         alert(`Erro: ${data.detail || 'Erro ao finalizar venda.'}`);
@@ -398,6 +406,32 @@ function Caixa({ token, onLogout }) {
                 <span>Total:</span>
                 <span style={{ color: '#28a745' }}>R$ {valorTotal.toFixed(2)}</span>
               </div>
+
+              {/* ⬇️ INSERIDO: CAMPO DE SELEÇÃO DE PAGAMENTO ⬇️ */}
+              <div style={{ marginTop: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#555', fontSize: '14px' }}>
+                  Forma de Pagamento:
+                </label>
+                <select
+                  value={formaPagamento}
+                  onChange={(e) => setFormaPagamento(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    border: '1px solid #ccc',
+                    fontSize: '16px',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="pix">Pix</option>
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="crédito">Cartão de Crédito</option>
+                  <option value="débito">Cartão de Débito</option>
+                </select>
+              </div>
+              {/* ⬆️ FIM DA INSERÇÃO ⬆️ */}
 
               <button
                 onClick={finalizarVenda}

@@ -164,11 +164,11 @@ function HistoricoVendas({ token, onVoltar }) {
                   boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                   borderLeft: '5px solid #28a745',
                   display: 'flex',
-                  flexDirection: 'column', // ⬅️ Isso faz os elementos empilharem verticalmente
+                  flexDirection: 'column',
                   gap: '15px'
                 }}
               >
-                {/* --- CABEÇALHO DA VENDA (ID, Data e Total) --- */}
+                {/* --- CABEÇALHO DA VENDA (ID, Data, Total e PAGAMENTO) --- */}
                 <div>
                   <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
                     Venda #{venda.id_venda}
@@ -188,11 +188,21 @@ function HistoricoVendas({ token, onVoltar }) {
                   >
                     Total: R$ {Number(venda.valor_total).toFixed(2)}
                   </p>
+
+                  {/* ⬇️ INSERIDO: FORMA DE PAGAMENTO AQUI ⬇️ */}
+                  <p style={{ margin: '5px 0 0 0', fontSize: '15px', color: '#555' }}>
+                    <strong>Pagamento:</strong>{' '}
+                    <span style={{ textTransform: 'capitalize' }}>
+                      {venda.pagamento || 'Não informado'}
+                    </span>
+                  </p>
+                  {/* ⬆️ FIM DA INSERÇÃO ⬆️ */}
+
                 </div>
 
                 {/* --- LISTA DE ITENS EMBAIXO --- */}
                 <div style={{ 
-                  borderTop: '1px solid #eee', // ⬅️ Linha divisória sutil em cima dos itens
+                  borderTop: '1px solid #eee', 
                   paddingTop: '15px' 
                 }}>
                   <h4 style={{ margin: '0 0 10px 0', color: '#555' }}>Itens da venda</h4>

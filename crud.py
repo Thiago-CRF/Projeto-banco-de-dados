@@ -2,7 +2,7 @@ import psycopg2
 from datetime import datetime
 
 import database
-from schemas import Produto, ProdutoVenda, CreateUser
+from schemas import Produto, ProdutoVenda, CreateUser, TipoPagamento
 
 class Vendedor:
     def __init__(self):
@@ -71,7 +71,7 @@ class Vendedor:
     # e registra na tabela vendas, registrando também a hora
     # depois com o id dos produtos, quantidades, id da venda(tabela vendas) e o preço unitario
     # vai ser preenchido a tabela itens_venda, pra cada produto
-    def registrar_venda(self, lista_prod: list[ProdutoVenda]):
+    def registrar_venda(self, lista_prod: list[ProdutoVenda], pagamento: TipoPagamento):
         # recebe lista de obejtos pydantic ProdutoVenda. atributos: id, qnt_venda
 
         # primeiro pega os valores do produtos recebidos, com o id e faz o calculo do valor total da compra
@@ -101,9 +101,9 @@ class Vendedor:
             soma_valores += (i.qnt_venda * dict_id_preco[i.id])
 
         self.cur.execute("""
-            INSERT INTO vendas (valor_total)
-            VALUES (%s)
-            RETURNING id_venda""", (soma_valores,)
+            INSERT INTO vendas (valor_total, pagamento)
+            VALUES (%s, %s)
+            RETURNING id_venda""", (soma_valores, pagamento)
         )
         # fetch sempre retorna uma tupla, mesmo fetchone. pegando só o primeiro item pra pegar o numero em si
         id_venda = self.cur.fetchone()[0]
@@ -242,7 +242,7 @@ class Gerente(Vendedor):
     def historico_vendas(self, data_inicio: datetime = None, data_fim: datetime = None):
         # mostrando id, valor total, data/hora e itens(de forma simples, nome e preço e quantidade)
         sql_base = """
-            SELECT V.id_venda, V.data_hora, V.valor_total, P.nome, I.preco_unid, I.quantidade
+            SELECT V.id_venda, V.data_hora, V.valor_total, V.pagamento, P.nome, I.preco_unid, I.quantidade
             FROM vendas V
             INNER JOIN itens_venda I ON V.id_venda = I.id_venda
             INNER JOIN produtos P ON P.id_prod = I.id_produto
