@@ -191,7 +191,7 @@ def relatorio_vendas_produtos(data_inicio: Optional[datetime] = None,  data_fim:
                               adm: crud.Gerente = Depends(get_gerente)):
 
     try:
-        relatorio = adm.relatorio_vendas(data_inicio, data_fim)
+        relatorio = adm.relatorio_produtos(data_inicio, data_fim)
 
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))

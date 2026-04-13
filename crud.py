@@ -209,7 +209,7 @@ class Gerente(Vendedor):
 
     # 'gerar relatório' gera o relatório de vendas dos produtos, com quantidade vendida, 
     # valor vendido e valor total. De cada produto
-    def relatorio_vendas(self, data_inicio: datetime = None, data_fim: datetime = None):
+    def relatorio_produtos(self, data_inicio: datetime = None, data_fim: datetime = None):
     # fazer calculo dos valores com código SQL
         sql_base = """
             SELECT P.id_prod, P.nome, I.preco_unid AS preco, 
