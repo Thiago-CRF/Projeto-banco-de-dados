@@ -8,7 +8,7 @@ Projeto feito inicialmente para a matéria de banco de dados de ciência da comp
 
 ### Front-end
 
-- **React** (Vite / Create React App)
+* **React** (Vite / Create React App)
   
 - **JavaScript (ES6+)** (e CSS inline)
   
@@ -19,7 +19,7 @@ Projeto feito inicialmente para a matéria de banco de dados de ciência da comp
 ### Back-end
 
 - **Python 3.13**
-- 
+  
 - **FastAPI** (Criação da API RESTful)
 
 - **uvicorn** (servidor web ASGI para requisições HTTP)
