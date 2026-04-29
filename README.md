@@ -64,7 +64,7 @@ cd Projeto-banco-de-dados
 ### 2. Preparação do Banco de Dados:
 Instale PostgreSQL localmente, crie um banco de dados e pega a URL do banco. Ou utilize um host como o [Neon.tech](https://neon.tech) que utilizei e pegue a URL de conexão do banco de dados. 
 
-Não é necessário criar as tabelas manualmente; o script `database.py` as cria automaticamente na primeira execução.
+Não é necessário criar as tabelas manualmente, o script `database.py` as cria automaticamente na primeira execução.
 
 ### 3. Configuração das variáveis de ambiente:
 1. Crie uma chave 32 bytes para a encriptação rodando esse comando no terminal:
@@ -78,11 +78,11 @@ URL_DATABASE=<link do banco de dados na nuvem ou local>
 AUTH_KEY=<chave 32 bytes aleatoria criada com o comando "python -c "import secrets; print(secrets.token_hex(32))"">
 ALGORITHM_JWT=<qualquer algoritimo suportado pelo PyJWT. Como HS256, RS256, ES256, HS512 etc.>
 ```
-E coloque a URL do seu banco de dados após URL_DATABASE=
+E coloque a URL do seu banco de dados após **URL_DATABASE=**
 
-Coloque a chave 32 bytes criada com o código anterior após AUTH_KEY=
+Coloque a chave 32 bytes criada com o código anterior após **AUTH_KEY=**
 
-E coloque um algoritimo válido de sua escolha após ALGORITHM_JWT=, HS256 é um dos mais comumente usados.
+E coloque um algoritimo válido de sua escolha após **ALGORITHM_JWT=**, HS256 é um dos mais comumente usados.
 
 Deixe tudo junto sem espaço sem espaço ao colocar os valores.
 
@@ -114,4 +114,10 @@ pip install -r api/requirements.txt
 **3. Inicie o servidor:**
 ```bash
 uvicorn main:app --reload
+```
+
+### 5. Configuração do Front-end:
+**1. Abra um novo terminal e acesse a pasta do frontend:**
+```bash
+cd frontend/front-lanchonete
 ```
