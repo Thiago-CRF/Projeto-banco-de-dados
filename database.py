@@ -1,6 +1,7 @@
 import psycopg2
 from os import getenv
 from dotenv import load_dotenv
+import auth
 
 # usando neon.tch como banco na nuvem, carregando url do .env
 load_dotenv()
@@ -66,6 +67,19 @@ def criar_banco():
         cur.execute(sql_usuarios_table)
         
         con.commit()
+
+        # cria usuário padrão inicial, apenas para acesso inicial
+        cur.execute("SELECT COUNT(*) FROM usuarios")
+        qtd_usuarios = cur.fetchone()[0]
+        if qtd_usuarios == 0:
+            senha_hash = auth.get_hash_senha("admin123")
+
+            cur.execute("""
+                INSERT INTO usuarios (username, hash_senha, cargo) 
+                VALUES (%s, %s, %s)
+            """), ("admin", senha_hash, "gerente")
+
+            con.commit()
 
     except Exception as erro:
         print(f"Erro ao criar o banco de dados: {erro}")
