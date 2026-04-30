@@ -8,18 +8,6 @@ Projeto feito inicialmente para a matéria de banco de dados de ciência da comp
 
 ## Tecnologias Utilizadas
 
-### Front-end
-
-- **React** (Vite / Create React App)
-  
-- **JavaScript (ES6+)** (e CSS inline)
-  
-- **`Fetch()`** (para chamada do Back-end)
-  
-- **LocalStorage** (Gerenciamento de sessão e persistência segura do Token JWT no navegador)
-
-- Roteamento condicional de telas e controle de estados com Hooks (`useState`, `useEffect`)
-
 ### Back-end
 
 - **Python 3.13**
@@ -40,6 +28,18 @@ Projeto feito inicialmente para a matéria de banco de dados de ciência da comp
 
 ### Banco de Dados
 - **PostgreSQL** (Usado neon.tech como host do BD, mas qualquer BD PostgresSQL vai funcionar)
+
+### Front-end
+
+- **React** (Vite, com Create React App)
+  
+- **JavaScript (ES6+)** (e CSS inline)
+  
+- **`Fetch()`** (para chamada do Back-end)
+  
+- **LocalStorage** (Gerenciamento de sessão e persistência segura do Token JWT no navegador)
+
+- Roteamento condicional de telas e controle de estados com Hooks (`useState`, `useEffect`)
 
 ## Funcionalidades
 
@@ -67,12 +67,12 @@ Instale PostgreSQL localmente, crie um banco de dados e pega a URL do banco. Ou 
 Não é necessário criar as tabelas manualmente, o script `database.py` as cria automaticamente na primeira execução.
 
 ### 3. Configuração das variáveis de ambiente:
-1. Crie uma chave 32 bytes para a encriptação rodando esse comando no terminal:
+1: Crie uma chave 32 bytes para a encriptação rodando esse comando no terminal:
 ```bash
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-2. Crie um arquivo `.env` baseado no `.env.example`:
+2: Crie um arquivo `.env` baseado no `.env.example`:
 ```bash
 URL_DATABASE=<link do banco de dados na nuvem ou local>
 AUTH_KEY=<chave 32 bytes aleatoria criada com o comando "python -c "import secrets; print(secrets.token_hex(32))"">
@@ -87,7 +87,7 @@ E coloque um algoritimo válido de sua escolha após **ALGORITHM_JWT=**, HS256 �
 Deixe tudo junto sem espaço sem espaço ao colocar os valores.
 
 ### 4. Configuração do Back-end:
-**1. Crie e ative o ambiente virtual (.venv):**
+1: Crie e ative o ambiente virtual (.venv):
 - No Windows:
 ```bash
 python3.13 -m venv .venv
@@ -106,18 +106,41 @@ E depois:
 source .venv/bin/activate
 ```
 
-**2. Instale as dependências, usando o `requirements.txt`:**
+2: Instale as dependências, usando o `requirements.txt`:
 ```bash
-pip install -r api/requirements.txt
+pip install -r requirements.txt
 ```
 
-**3. Inicie o servidor:**
+3: Inicie o servidor:
 ```bash
 uvicorn main:app --reload
 ```
 
 ### 5. Configuração do Front-end:
-**1. Abra um novo terminal e acesse a pasta do frontend:**
+1: Abra um novo terminal e acesse a pasta do frontend:
 ```bash
 cd frontend/front-lanchonete
 ```
+
+2: Instale as dependências do Node:
+```bash
+npm install
+```
+
+3: Verifique o arquivo `constants.js` para garantir que a `URL_BASE` é o local host do FastAPI, que apareceu ao rodar o servidor da API anteriormente, normalment o padrão é: `http://localhost:8000`. Ou mude para a URL criada pelo host da API, caso use um host na nuvem.
+
+4: Inicie o front-end do projeto:
+```bash
+npm run dev 
+```
+Após isso entre no URL retornado pelo front-end. Que é algum link localhost, como: `http://localhost:5173/`
+
+## Observações:
+### 1: Criação da primeira conta do sistema:
+Por conta do sistema ser criado do zero e do sistema precisar do login logo no começo pra acessar as funcionalidades. Por isso o sistema cria uma conta de gerente padrão para uso inicial, com o login:
+
+Username: admin
+Senha: admin123
+
+### 2: Para mais informações detalhadas sobre a API:
+Acesse o URL da API, que apareceu ao rodar o servidor, com /docs no final. Será possivel ver todos os métodos criados da API, o que recebem e o que retornam de valores, e é possivel também testar os métodos, para testar os métodos dependentes de login, faça o login no botão authorize.
