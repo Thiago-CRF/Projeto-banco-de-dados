@@ -140,6 +140,7 @@ Após isso entre no URL retornado pelo front-end. Que é algum link localhost, c
 Por conta do sistema ser criado do zero e do sistema precisar do login logo no começo pra acessar as funcionalidades. Por isso o sistema cria uma conta de gerente padrão para uso inicial, com o login:
 
 Username: admin
+
 Senha: admin123
 
 ### 2: Para mais informações detalhadas sobre a API:
