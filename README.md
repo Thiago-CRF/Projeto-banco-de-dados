@@ -31,7 +31,7 @@ Projeto feito inicialmente para a matéria de banco de dados de ciência da comp
 
 ### Front-end
 
-- **React** (Vite, com Create React App)
+- **React** (Vite)
   
 - **JavaScript (ES6+)** (e CSS inline)
   
@@ -62,7 +62,7 @@ cd Projeto-banco-de-dados
 ```
 
 ### 2. Preparação do Banco de Dados:
-Instale PostgreSQL localmente, crie um banco de dados e pega a URL do banco. Ou utilize um host como o [Neon.tech](https://neon.tech) que utilizei e pegue a URL de conexão do banco de dados. 
+Instale PostgreSQL localmente, crie um banco de dados e pegue a URL do banco. Ou utilize um host como o [Neon.tech](https://neon.tech) que utilizei e pegue a URL de conexão do banco de dados. 
 
 Não é necessário criar as tabelas manualmente, o script `database.py` as cria automaticamente na primeira execução.
 
@@ -82,7 +82,7 @@ E coloque a URL do seu banco de dados após **URL_DATABASE=**
 
 Coloque a chave 32 bytes criada com o código anterior após **AUTH_KEY=**
 
-E coloque um algoritimo válido de sua escolha após **ALGORITHM_JWT=**, HS256 é um dos mais comumente usados.
+E coloque um algoritmo válido de sua escolha após **ALGORITHM_JWT=**, HS256 é um dos mais comumente usados.
 
 Deixe tudo junto sem espaço sem espaço ao colocar os valores.
 
@@ -127,7 +127,7 @@ cd frontend/front-lanchonete
 npm install
 ```
 
-3: Verifique o arquivo `constants.js` para garantir que a `URL_BASE` é o local host do FastAPI, que apareceu ao rodar o servidor da API anteriormente, normalment o padrão é: `http://localhost:8000`. Ou mude para a URL criada pelo host da API, caso use um host na nuvem.
+3: Verifique o arquivo `constants.js` para garantir que a `URL_BASE` é o local host do FastAPI, que apareceu ao rodar o servidor da API anteriormente, normalmente o padrão é: `http://localhost:8000`. Ou mude para a URL criada pelo host da API, caso use um host na nuvem.
 
 4: Inicie o front-end do projeto:
 ```bash
