@@ -43,7 +43,7 @@ function GerenciarProdutos({ token, onVoltar, onLogout }) {
         })
       ]);
 
-      if (response.status === 401) {
+      if (resAtivos.status === 401 || resInativos.status === 401) {
           alert("Sua sessão expirou. Por favor, faça login novamente");
           onLogout();
           return;
