@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { URL_BASE } from './constants'; // import do link da api
 
-function GerenciarProdutos({ token, onVoltar }) {
+function GerenciarProdutos({ token, onVoltar, onLogout }) {
   const [produtos, setProdutos] = useState([]);
   const [produtosInativos, setProdutosInativos] = useState([]); // ESTADO PARA INATIVOS
   const [mostrarInativos, setMostrarInativos] = useState(false); // CONTROLA SE A LISTA ESTÁ ABERTA OU FECHADA
@@ -42,6 +42,12 @@ function GerenciarProdutos({ token, onVoltar }) {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
+
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
 
       const dataAtivos = await resAtivos.json();
       const dataInativos = await resInativos.json();
@@ -92,6 +98,12 @@ function GerenciarProdutos({ token, onVoltar }) {
         })
       });
 
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
+
       if (response.ok) {
         setMensagem(`✅ Produto "${novoProduto.nome}" adicionado com sucesso!`);
         setAdicionando(false); // Fecha o card de adição
@@ -118,6 +130,12 @@ function GerenciarProdutos({ token, onVoltar }) {
         headers: { Authorization: `Bearer ${token}` }
       });
 
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
+
       if (response.ok) {
         setMensagem('✅ Produto removido com sucesso!');
         buscarProdutos();
@@ -138,6 +156,12 @@ const handleReativarProduto = async (id, nomeProduto) => {
       method: 'POST', // Usando POST conforme sua API
       headers: { Authorization: `Bearer ${token}` }
     });
+
+    if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
 
     if (response.ok) {
       setMensagem(`✅ Produto "${nomeProduto}" reativado com sucesso!`);
@@ -182,6 +206,12 @@ const handleReativarProduto = async (id, nomeProduto) => {
           qnt_vendida: dadosEdicao.qnt_vendida
         })
       });
+
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
 
       if (response.ok) {
         setMensagem('✅ Produto atualizado com sucesso!');

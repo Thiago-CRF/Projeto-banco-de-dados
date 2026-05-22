@@ -4,14 +4,14 @@ import CriarUsuario from './Criarusuario';
 import GerenciarProdutos from './GerenciarProdutos';
 import RelatorioProdutos from './RelatorioProdutos'; // IMPORTAMOS A NOVA TELA
 
-function Configuracoes({ token, onVoltar }) {
+function Configuracoes({ token, onLogout, onVoltar }) {
   const [telaInterna, setTelaInterna] = useState('menu');
 
   // Redirecionamento das telas
-  if (telaInterna === 'historico-vendas') return <HistoricoVendas token={token} onVoltar={() => setTelaInterna('menu')} />;
-  if (telaInterna === 'criar-usuario') return <CriarUsuario token={token} onVoltar={() => setTelaInterna('menu')} />;
-  if (telaInterna === 'gerenciar-produtos') return <GerenciarProdutos token={token} onVoltar={() => setTelaInterna('menu')} />;
-  if (telaInterna === 'relatorio-produtos') return <RelatorioProdutos token={token} onVoltar={() => setTelaInterna('menu')} />;
+  if (telaInterna === 'historico-vendas') return <HistoricoVendas token={token} onLogout={onLogout} onVoltar={() => setTelaInterna('menu')} />;
+  if (telaInterna === 'criar-usuario') return <CriarUsuario token={token} onLogout={onLogout} onVoltar={() => setTelaInterna('menu')} />;
+  if (telaInterna === 'gerenciar-produtos') return <GerenciarProdutos token={token} onLogout={onLogout} onVoltar={() => setTelaInterna('menu')} />;
+  if (telaInterna === 'relatorio-produtos') return <RelatorioProdutos token={token} onLogout={onLogout} onVoltar={() => setTelaInterna('menu')} />;
 
   // Estilo padronizado para os cartões do menu (para não repetir código)
   const cardStyle = {

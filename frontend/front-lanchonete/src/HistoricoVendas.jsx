@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { URL_BASE } from './constants'; // import do link da api
 
-function HistoricoVendas({ token, onVoltar }) {
+function HistoricoVendas({ token, onVoltar, onLogout }) {
   const [historico, setHistorico] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -41,6 +41,12 @@ function HistoricoVendas({ token, onVoltar }) {
             Authorization: `Bearer ${token}`
           }
         });
+
+        if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
 
         const data = await response.json();
 

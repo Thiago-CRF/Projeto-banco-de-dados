@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { URL_BASE } from './constants'; // import do link da api
 
-function CriarUsuario({ token, onVoltar }) {
+function CriarUsuario({ token, onVoltar, onLogout }) {
   const [email, setEmail] = useState('');
   const [cargo, setCargo] = useState('');
   const [senha, setSenha] = useState('');
@@ -34,6 +34,12 @@ function CriarUsuario({ token, onVoltar }) {
           senha
         })
       });
+
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
 
       const data = await response.json();
 

@@ -38,6 +38,12 @@ function Caixa({ token, onLogout }) {
         }
       );
 
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
+
       if (response.ok) {
         const data = await response.json();
         setProdutos(data);
@@ -57,6 +63,13 @@ function Caixa({ token, onLogout }) {
       const response = await fetch(`${URL_BASE}/produtos`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
+
       if (response.ok) {
         const data = await response.json();
         setProdutos(data);
@@ -131,6 +144,12 @@ function Caixa({ token, onLogout }) {
         },
         body: JSON.stringify(payload) // ⬇️ MODIFICADO: Envia o payload
       });
+
+      if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
 
       if (response.ok) {
         alert('✅ Venda finalizada com sucesso!');
