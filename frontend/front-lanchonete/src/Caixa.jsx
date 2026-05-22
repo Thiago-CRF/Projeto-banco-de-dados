@@ -17,6 +17,12 @@ function Caixa({ token, onLogout }) {
           headers: { Authorization: `Bearer ${token}` }
         });
 
+        if (response.status === 401) {
+          alert("Sua sessão expirou. Por favor, faça login novamente");
+          onLogout();
+          return;
+        }
+
         if (response.ok) {
           const data = await response.json();
           setProdutos(data);
@@ -140,7 +146,7 @@ function Caixa({ token, onLogout }) {
   };
 
   if (telaAtual === 'config') {
-    return <Configuracoes token={token} onVoltar={() => setTelaAtual('caixa')} />;
+    return <Configuracoes token={token} onLogout={onLogout} onVoltar={() => setTelaAtual('caixa')} />
   }
 
   return (

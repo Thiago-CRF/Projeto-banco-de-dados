@@ -60,15 +60,14 @@ def get_gerente(payload: dict = Depends(decode_token)):
     if payload.get("cargo") != "gerente":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail="Acesso negado. Ação exige acesso de gerente")
-
     adm = crud.Gerente()
     try:
         yield adm
     finally:
         adm.fechar_conexao()
 
-# vendedor continua igual porque só tem gerente e vendedor. Então não precisa verificar se é vendedor quando chamar
-def get_vendedor():
+# vendedor tem que verificar também, porque verifica a validade do token
+def get_vendedor(payload: dict = Depends(decode_token)):
     vend = crud.Vendedor()
     try:
         yield vend
